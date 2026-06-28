@@ -1,0 +1,402 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+:root {
+  /* ===== SHADCN-INSPIRED MEMBER DESIGN TOKENS ===== */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --success: 142.1 76.2% 36.3%;
+  --success-foreground: 355.7 100% 97.3%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 48 96% 89%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.75rem;
+
+  /* ===== ADMIN CONSOLE ===== */
+  --color-admin-indigo: #6D5DFC;
+  --color-admin-indigo-deep: #4B3DF5;
+  --color-admin-indigo-tint: #EFEBFF;
+  --color-admin-ink: #15131F;
+  --color-admin-slate: #6F6C84;
+  --color-admin-mist: #ABA8BD;
+  --color-admin-surface: #FFFFFF;
+  --color-admin-canvas: #F6F6FB;
+  --color-admin-border: #E6E6F0;
+  --color-admin-success: #16A34A;
+  --color-admin-success-tint: #DCFCE7;
+  --color-admin-danger: #DC2626;
+  --color-admin-danger-tint: #FEE2E2;
+
+  --radius-admin-lg: 16px;
+  --radius-admin-md: 10px;
+  --radius-admin-full: 999px;
+
+  --space-admin-1: 4px;  --space-admin-2: 8px;  --space-admin-3: 12px;
+  --space-admin-4: 16px; --space-admin-5: 20px; --space-admin-6: 24px;
+  --space-admin-8: 32px; --space-admin-10: 40px;
+
+  /* ===== MEMBER APP ===== */
+  --color-member-blue: #1A6DFF;
+  --color-member-blue-deep: #0F52CC;
+  --color-member-blue-tint: #E8F0FF;
+  --color-member-ink: #0f172a;
+  --color-member-slate: #64748b;
+  --color-member-mist: #94a3b8;
+  --color-member-surface: #FFFFFF;
+  --color-member-canvas: #f8fafc;
+  --color-member-border: #e2e8f0;
+
+  --color-status-hadir: #16A34A;      --color-status-hadir-tint: #DCFCE7;
+  --color-status-terlambat: #D97706;  --color-status-terlambat-tint: #FEF3C7;
+  --color-status-izin: #2563EB;       --color-status-izin-tint: #DBEAFE;
+  --color-status-sakit: #EA580C;      --color-status-sakit-tint: #FFEDD5;
+  --color-status-alpha: #DC2626;      --color-status-alpha-tint: #FEE2E2;
+
+  --color-feature-coral: #FF6584;
+  --color-feature-violet: #8B5CF6;
+  --color-feature-sky: #38BDF8;
+  --color-feature-mint: #22C55E;
+  --color-feature-amber: #F59E0B;
+
+  --radius-member-xl: 16px;
+  --radius-member-lg: 12px;
+  --radius-member-full: 999px;
+
+  --space-member-2: 8px;  --space-member-3: 12px; --space-member-4: 16px;
+  --space-member-5: 20px; --space-member-6: 24px; --space-member-8: 32px;
+  --space-member-10: 40px;
+
+  --shadow-member-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+  --shadow-member-primary: 0 4px 14px 0 rgb(26 109 255 / 0.25);
+  --shadow-admin-float: 0 4px 12px rgba(21, 19, 31, 0.06);
+  --shadow-member-elevated: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+@theme {
+  /* Admin properties mapped to custom colors/radii/fonts */
+  --color-admin-indigo: var(--color-admin-indigo);
+  --color-admin-indigo-deep: var(--color-admin-indigo-deep);
+  --color-admin-indigo-tint: var(--color-admin-indigo-tint);
+  --color-admin-ink: var(--color-admin-ink);
+  --color-admin-slate: var(--color-admin-slate);
+  --color-admin-mist: var(--color-admin-mist);
+  --color-admin-surface: var(--color-admin-surface);
+  --color-admin-canvas: var(--color-admin-canvas);
+  --color-admin-border: var(--color-admin-border);
+  --color-admin-success: var(--color-admin-success);
+  --color-admin-success-tint: var(--color-admin-success-tint);
+  --color-admin-danger: var(--color-admin-danger);
+  --color-admin-danger-tint: var(--color-admin-danger-tint);
+
+  --radius-admin-lg: var(--radius-admin-lg);
+  --radius-admin-md: var(--radius-admin-md);
+  --radius-admin-full: var(--radius-admin-full);
+
+  --font-admin: "Inter", "Plus Jakarta Sans", sans-serif;
+
+  /* Member properties mapped to custom colors/radii/fonts */
+  --color-member-blue: var(--color-member-blue);
+  --color-member-blue-deep: var(--color-member-blue-deep);
+  --color-member-blue-tint: var(--color-member-blue-tint);
+  --color-member-ink: var(--color-member-ink);
+  --color-member-slate: var(--color-member-slate);
+  --color-member-mist: var(--color-member-mist);
+  --color-member-surface: var(--color-member-surface);
+  --color-member-canvas: var(--color-member-canvas);
+  --color-member-border: var(--color-member-border);
+
+  --color-status-hadir: var(--color-status-hadir);
+  --color-status-hadir-tint: var(--color-status-hadir-tint);
+  --color-status-terlambat: var(--color-status-terlambat);
+  --color-status-terlambat-tint: var(--color-status-terlambat-tint);
+  --color-status-izin: var(--color-status-izin);
+  --color-status-izin-tint: var(--color-status-izin-tint);
+  --color-status-sakit: var(--color-status-sakit);
+  --color-status-sakit-tint: var(--color-status-sakit-tint);
+  --color-status-alpha: var(--color-status-alpha);
+  --color-status-alpha-tint: var(--color-status-alpha-tint);
+
+  --color-feature-coral: var(--color-feature-coral);
+  --color-feature-violet: var(--color-feature-violet);
+  --color-feature-sky: var(--color-feature-sky);
+  --color-feature-mint: var(--color-feature-mint);
+  --color-feature-amber: var(--color-feature-amber);
+
+  --radius-member-xl: var(--radius-member-xl);
+  --radius-member-lg: var(--radius-member-lg);
+  --radius-member-full: var(--radius-member-full);
+
+  --font-member: "Plus Jakarta Sans", "Sora", sans-serif;
+
+  --shadow-member-card: var(--shadow-member-card);
+  --shadow-member-primary: var(--shadow-member-primary);
+  --shadow-admin-float: var(--shadow-admin-float);
+}
+
+[x-cloak] { display: none !important; }
+body { -webkit-tap-highlight-color: transparent; }
+::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+
+/* ===== iOS Safari Bottom Nav Fix ===== */
+.ios-bottom-nav {
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Force GPU compositing for smoother fixed positioning on iOS */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* dvh fallback for older iOS versions */
+@supports not (min-height: 100dvh) {
+  .min-h-dvh {
+    min-height: -webkit-fill-available;
+  }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.skeleton-pulse {
+  background-color: var(--color-admin-border);
+  animation: pulse-soft 1.5s ease-in-out infinite;
+}
+.member-skeleton-pulse {
+  background-color: var(--color-member-border);
+  animation: pulse-soft 1.5s ease-in-out infinite;
+}
+
+/* ===== CUSTOM PAGINATION OVERRIDES ===== */
+/* Admin Pagination */
+.bg-admin-canvas nav[role="navigation"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.bg-admin-canvas nav[role="navigation"] a,
+.bg-admin-canvas nav[role="navigation"] span {
+  font-family: var(--font-admin);
+  border-radius: var(--radius-admin-md) !important;
+  border: 1px solid var(--color-admin-border) !important;
+  background-color: var(--color-admin-surface) !important;
+  color: var(--color-admin-slate) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 150ms ease-out !important;
+}
+.bg-admin-canvas nav[role="navigation"] a:hover {
+  background-color: var(--color-admin-canvas) !important;
+  color: var(--color-admin-ink) !important;
+  border-color: var(--color-admin-indigo) !important;
+}
+.bg-admin-canvas nav[role="navigation"] span[aria-current="page"] span {
+  background-color: var(--color-admin-indigo-tint) !important;
+  color: var(--color-admin-indigo) !important;
+  border-color: var(--color-admin-indigo) !important;
+  font-weight: 600 !important;
+}
+.bg-admin-canvas nav[role="navigation"] svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: inline-block !important;
+}
+
+/* Member Pagination */
+.bg-member-canvas nav[role="navigation"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.bg-member-canvas nav[role="navigation"] a,
+.bg-member-canvas nav[role="navigation"] span {
+  font-family: var(--font-member);
+  border-radius: var(--radius-member-full) !important;
+  border: none !important;
+  background-color: var(--color-member-surface) !important;
+  color: var(--color-member-slate) !important;
+  box-shadow: var(--shadow-member-card) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  transition: all 150ms ease-out !important;
+}
+.bg-member-canvas nav[role="navigation"] a:hover {
+  background-color: var(--color-member-canvas) !important;
+  color: var(--color-member-blue) !important;
+}
+.bg-member-canvas nav[role="navigation"] span[aria-current="page"] span {
+  background-color: var(--color-member-blue) !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-member-primary) !important;
+}
+/* ===== SHADCN-INSPIRED COMPONENT STYLES ===== */
+
+/* shadcn Button variants */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-member-blue/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98];
+  border-radius: var(--radius);
+}
+.btn-primary {
+  @apply bg-member-blue text-white hover:bg-member-blue-deep;
+  box-shadow: var(--shadow-member-primary);
+}
+.btn-secondary {
+  @apply bg-slate-100 text-slate-900 hover:bg-slate-200;
+}
+.btn-outline {
+  @apply border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900;
+}
+.btn-ghost {
+  @apply text-slate-600 hover:bg-slate-100 hover:text-slate-900;
+}
+.btn-destructive {
+  @apply bg-red-500 text-white hover:bg-red-600;
+  box-shadow: 0 4px 14px 0 rgb(220 38 38 / 0.25);
+}
+.btn-amber {
+  @apply bg-amber-500 text-white hover:bg-amber-600;
+  box-shadow: 0 4px 14px 0 rgb(245 158 11 / 0.25);
+}
+.btn-sm { @apply h-9 px-4 text-xs; }
+.btn-md { @apply h-11 px-6 text-sm; }
+.btn-lg { @apply h-12 px-8 text-base; }
+.btn-full { @apply w-full; }
+.btn-icon { @apply h-10 w-10 p-0; }
+
+/* shadcn Card */
+.s-card {
+  @apply bg-white border border-slate-200/60;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-member-card);
+}
+.s-card-header { @apply p-5 pb-3; }
+.s-card-title { @apply text-base font-semibold tracking-tight text-slate-900; }
+.s-card-desc { @apply text-sm text-slate-500 mt-1; }
+.s-card-body { @apply p-5 pt-0; }
+.s-card-footer { @apply p-5 pt-0 flex items-center gap-3; }
+
+/* shadcn Input */
+.s-input {
+  @apply flex h-11 w-full px-4 py-2 text-sm bg-white border border-slate-200 transition-colors duration-150;
+  @apply placeholder:text-slate-400;
+  @apply focus:outline-none focus:ring-2 focus:ring-member-blue/30 focus:border-member-blue/50;
+  @apply disabled:cursor-not-allowed disabled:opacity-50;
+  border-radius: var(--radius);
+  color: var(--color-member-ink);
+}
+.s-textarea {
+  @apply flex min-h-[100px] w-full px-4 py-3 text-sm bg-white border border-slate-200 transition-colors duration-150 resize-none;
+  @apply placeholder:text-slate-400;
+  @apply focus:outline-none focus:ring-2 focus:ring-member-blue/30 focus:border-member-blue/50;
+  border-radius: var(--radius);
+  color: var(--color-member-ink);
+}
+.s-select {
+  @apply flex h-11 w-full px-4 py-2 text-sm bg-white border border-slate-200 appearance-none transition-colors duration-150;
+  @apply focus:outline-none focus:ring-2 focus:ring-member-blue/30 focus:border-member-blue/50;
+  border-radius: var(--radius);
+  color: var(--color-member-ink);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2.5rem;
+}
+.s-label {
+  @apply text-xs font-medium text-slate-600 uppercase tracking-wider mb-2 block;
+}
+
+/* shadcn Badge */
+.s-badge {
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium border;
+  border-radius: var(--radius-member-full);
+}
+.s-badge-default { @apply bg-slate-100 text-slate-700 border-slate-200; }
+.s-badge-success { @apply bg-emerald-50 text-emerald-700 border-emerald-200; }
+.s-badge-warning { @apply bg-amber-50 text-amber-700 border-amber-200; }
+.s-badge-danger { @apply bg-red-50 text-red-700 border-red-200; }
+.s-badge-info { @apply bg-blue-50 text-blue-700 border-blue-200; }
+.s-badge-primary { @apply bg-member-blue-tint text-member-blue border-member-blue/20; }
+
+/* shadcn Separator */
+.s-separator {
+  @apply h-px w-full bg-slate-200/70;
+}
+
+/* shadcn-style tabs */
+.s-tabs {
+  @apply flex gap-1 p-1 bg-slate-100;
+  border-radius: var(--radius);
+}
+.s-tab {
+  @apply flex-1 py-2 text-sm font-medium text-center transition-all duration-200 cursor-pointer;
+  border-radius: calc(var(--radius) - 2px);
+}
+.s-tab-active {
+  @apply bg-white text-slate-900;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08);
+}
+.s-tab-inactive {
+  @apply text-slate-500 hover:text-slate-700;
+}
+
+/* Improved stat cards */
+.stat-card {
+  @apply p-4 text-center;
+  border-radius: var(--radius);
+}
+
+/* Smooth focus ring for all interactive */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid hsl(var(--ring) / 0.5);
+  outline-offset: 2px;
+}
+
+/* shadcn-style skeleton */
+.s-skeleton {
+  @apply animate-pulse bg-slate-200 rounded;
+}
+
+.bg-member-canvas nav[role="navigation"] svg {
+  width: 16px !important;
+  height: 16px !important;
+  display: inline-block !important;
+}
+
+
