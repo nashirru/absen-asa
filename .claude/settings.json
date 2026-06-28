@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "C:\\xampp\\php"
+    ],
+    "allow": [
+      "Bash(/c/xampp/php/php.exe artisan *)"
+    ]
+  }
+}

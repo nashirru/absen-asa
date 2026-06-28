@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Absensi;
+use App\Models\Account;
+use App\Models\Category;
 use App\Models\Holiday;
 use App\Models\Jadwal;
 use App\Models\Kelas;
@@ -10,19 +12,24 @@ use App\Models\Karyawan;
 use App\Models\Sensei;
 use App\Models\Setting;
 use App\Models\Siswa;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $today = Carbon::today();
         $dayName = $today->locale('id')->isoFormat('dddd');
 
         if ($user->isSuperAdmin() || $user->isAdmin()) {
+            $mode = $request->get('mode', 'absensi');
+            if ($mode === 'keuangan') {
+                return $this->adminFinanceDashboard();
+            }
             return $this->adminDashboard($today, $dayName);
         } elseif ($user->isSiswa()) {
             return $this->siswaDashboard($user, $today, $dayName);
@@ -74,16 +81,25 @@ class DashboardController extends Controller
             })
             ->get();
 
-        // Chart data - last 7 days
+        // Chart data - last 7 days (optimized: 1 query instead of 28)
+        $startDate = Carbon::today()->subDays(6);
+        $chartStats = Absensi::selectRaw('tanggal, status, COUNT(*) as total')
+            ->where('tanggal', '>=', $startDate)
+            ->whereIn('status', ['hadir', 'terlambat', 'izin', 'sakit', 'alpha'])
+            ->groupBy('tanggal', 'status')
+            ->get()
+            ->groupBy('tanggal');
+
         $chartData = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::today()->subDays($i);
+            $dayStats = $chartStats->get($date->format('Y-m-d'), collect());
             $chartData[] = [
                 'date' => $date->format('d M'),
-                'hadir' => Absensi::where('tanggal', $date)->whereIn('status', ['hadir', 'terlambat'])->count(),
-                'izin' => Absensi::where('tanggal', $date)->where('status', 'izin')->count(),
-                'sakit' => Absensi::where('tanggal', $date)->where('status', 'sakit')->count(),
-                'alpha' => Absensi::where('tanggal', $date)->where('status', 'alpha')->count(),
+                'hadir' => $dayStats->whereIn('status', ['hadir', 'terlambat'])->sum('total'),
+                'izin' => $dayStats->where('status', 'izin')->sum('total'),
+                'sakit' => $dayStats->where('status', 'sakit')->sum('total'),
+                'alpha' => $dayStats->where('status', 'alpha')->sum('total'),
             ];
         }
 
@@ -94,6 +110,70 @@ class DashboardController extends Controller
             'totalHadirHariIni', 'totalTerlambat', 'totalIzin', 'totalSakit', 'totalAlpha',
             'totalLemburHariIni', 'totalDurasiLembur',
             'chartData', 'recentActivity', 'mapAbsensi', 'sudahAbsen', 'belumAbsen', 'anomaliHariIni'
+        ));
+    }
+
+    private function adminFinanceDashboard()
+    {
+        $totalAccounts = Account::count();
+        $totalBalance = Account::sum('balance');
+        $incomeThisMonth = Transaction::where('type', 'income')
+            ->whereMonth('date', Carbon::now()->month)
+            ->whereYear('date', Carbon::now()->year)
+            ->sum('amount');
+        $expenseThisMonth = Transaction::where('type', 'expense')
+            ->whereMonth('date', Carbon::now()->month)
+            ->whereYear('date', Carbon::now()->year)
+            ->sum('amount');
+
+        $accounts = Account::all();
+        $latestTransactions = Transaction::with(['account', 'category'])
+            ->latest('date')->take(5)->get();
+        $netMonthly = $incomeThisMonth - $expenseThisMonth;
+
+        // Top 5 expense categories this month
+        $topExpenses = Transaction::selectRaw('category_id, SUM(amount) as total')
+            ->where('type', 'expense')
+            ->whereMonth('date', Carbon::now()->month)
+            ->whereYear('date', Carbon::now()->year)
+            ->groupBy('category_id')
+            ->with('category')
+            ->orderByDesc('total')
+            ->take(5)
+            ->get();
+
+        // Total pengeluaran gaji bulan ini
+        $salaryExpense = Transaction::where('type', 'expense')
+            ->where('description', 'like', '%Penggajian%')
+            ->whereMonth('date', Carbon::now()->month)
+            ->whereYear('date', Carbon::now()->year)
+            ->sum('amount');
+
+        // Jumlah karyawan aktif dengan payroll
+        $activePayrollCount = \App\Models\Karyawan::where('status', 'active')->count();
+
+        // Cashflow chart data (12 months)
+        $cashflowData = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $income = Transaction::where('type', 'income')
+                ->whereMonth('date', $date->month)
+                ->whereYear('date', $date->year)
+                ->sum('amount');
+            $expense = Transaction::where('type', 'expense')
+                ->whereMonth('date', $date->month)
+                ->whereYear('date', $date->year)
+                ->sum('amount');
+            $cashflowData[] = [
+                'month' => $date->locale('id')->isoFormat('MMM'),
+                'income' => $income,
+                'expense' => $expense,
+            ];
+        }
+
+        return view('dashboard.admin-finance', compact(
+            'totalAccounts', 'totalBalance', 'incomeThisMonth', 'expenseThisMonth', 'netMonthly',
+            'accounts', 'latestTransactions', 'cashflowData', 'topExpenses', 'salaryExpense', 'activePayrollCount'
         ));
     }
 

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Slip Gaji - {{ $payrollDetail->employee->name }}</title>
+    <title>Slip Gaji - {{ $employeeName }}</title>
     <style>
         body {
             font-family: 'Helvetica', 'Arial', sans-serif;
@@ -58,7 +58,7 @@
             <tr>
                 <td style="width: 50%; vertical-align: top; padding: 4px 0;">
                     <span style="color: #64748b; font-weight: 500;">Nama Karyawan:</span><br>
-                    <span style="font-weight: 600; color: #0f172a; font-size: 12px;">{{ $payrollDetail->employee->name }}</span>
+                    <span style="font-weight: 600; color: #0f172a; font-size: 12px;">{{ $employeeName }}</span>
                 </td>
                 <td style="width: 50%; vertical-align: top; padding: 4px 0;">
                     <span style="color: #64748b; font-weight: 500;">Tanggal Bayar:</span><br>
@@ -68,11 +68,11 @@
             <tr>
                 <td style="width: 50%; vertical-align: top; padding: 4px 0;">
                     <span style="color: #64748b; font-weight: 500;">Jabatan:</span><br>
-                    <span style="font-weight: 600; color: #0f172a;">{{ $payrollDetail->employee->position }}</span>
+                    <span style="font-weight: 600; color: #0f172a;">{{ $payrollDetail->karyawan?->jabatan ?? '-' }}</span>
                 </td>
                 <td style="width: 50%; vertical-align: top; padding: 4px 0;">
                     <span style="color: #64748b; font-weight: 500;">Departemen:</span><br>
-                    <span style="font-weight: 600; color: #0f172a;">{{ $payrollDetail->employee->department ?? '-' }}</span>
+                    <span style="font-weight: 600; color: #0f172a;">{{ $payrollDetail->karyawan?->divisi ?? '-' }}</span>
                 </td>
             </tr>
         </table>
@@ -137,7 +137,7 @@
             <tr>
                 <td style="width: 50%; text-align: center; vertical-align: top;">
                     <div style="color: #64748b; font-weight: 500; margin-bottom: 50px;">Diterima Oleh,</div>
-                    <div style="font-weight: 700; color: #0f172a; display: inline-block; border-top: 1px solid #cbd5e1; padding-top: 6px; width: 180px;">{{ $payrollDetail->employee->name }}</div>
+                    <div style="font-weight: 700; color: #0f172a; display: inline-block; border-top: 1px solid #cbd5e1; padding-top: 6px; width: 180px;">{{ $employeeName }}</div>
                 </td>
                 <td style="width: 50%; text-align: center; vertical-align: top;">
                     <div style="color: #64748b; font-weight: 500; margin-bottom: 50px;">Disetujui Oleh,</div>

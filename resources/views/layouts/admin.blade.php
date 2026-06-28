@@ -30,7 +30,7 @@
             </div>
 
             <!-- Navigation Links -->
-            <nav class="p-3 space-y-1">
+            <nav class="p-3 space-y-1 overflow-y-auto max-h-[calc(100vh-200px)]">
                 @php
                     $user = auth()->user();
                     $absensiNavItems = [];
@@ -39,6 +39,7 @@
                     if ($user->isSuperAdmin() || $user->isAdmin()) {
                         $absensiNavItems = [
                             ['route' => 'users.index',      'icon' => 'users',          'label' => 'User'],
+                            ['route' => 'karyawan.index',   'icon' => 'briefcase',      'label' => 'Karyawan'],
                             ['route' => 'absensi.index',    'icon' => 'calendar',       'label' => 'Absensi'],
                             ['route' => 'rekap.absensi',    'icon' => 'table',          'label' => 'Rekap'],
                             ['route' => 'locations.index',  'icon' => 'map-pin',        'label' => 'Lokasi'],
@@ -102,7 +103,16 @@
 
                     <!-- Dropdown Keuangan -->
                     @php
-                        $isKeuanganActive = request()->is('admin*');
+                        $isKeuanganActive = request()->routeIs('finance.*', 'payroll.slip', 'reports.print', 'dashboard.pdf');
+                        $financeRoutes = [
+                            ['route' => 'dashboard', 'params' => ['mode' => 'keuangan'], 'icon' => 'layout-dashboard', 'label' => 'Dasbor Keuangan'],
+                            ['route' => 'finance.accounts.index', 'icon' => 'landmark', 'label' => 'Akun Rekening'],
+                            ['route' => 'finance.categories.index', 'icon' => 'tag', 'label' => 'Kategori'],
+                            ['route' => 'finance.salary-components.index', 'icon' => 'calculator', 'label' => 'Komponen Gaji'],
+                            ['route' => 'finance.transactions.index', 'icon' => 'arrow-left-right', 'label' => 'Transaksi'],
+                            ['route' => 'finance.fund-transfers.index', 'icon' => 'repeat', 'label' => 'Transfer Dana'],
+                            ['route' => 'finance.payroll-periods.index', 'icon' => 'calendar', 'label' => 'Periode Gaji'],
+                        ];
                     @endphp
                     <div x-data="{ open: {{ $isKeuanganActive ? 'true' : 'false' }} }">
                         <button @click="open = !open"
@@ -115,48 +125,19 @@
                             </div>
                             <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200" :class="open ? 'transform rotate-180' : ''" x-show="sidebarOpen"></i>
                         </button>
-                        
+
                         <div x-show="open" x-cloak x-collapse class="pl-4 mt-1 space-y-1" :class="sidebarOpen ? '' : 'hidden'">
-                            <a href="/admin"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="layout-dashboard" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Dasbor Keuangan</span>
-                            </a>
-                            <a href="/admin/accounts"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/accounts*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="landmark" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Akun Rekening</span>
-                            </a>
-                            <a href="/admin/categories"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/categories*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="tag" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Kategori</span>
-                            </a>
-                            <a href="/admin/employees"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/employees*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="users" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Karyawan</span>
-                            </a>
-                            <a href="/admin/salary-components"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/salary-components*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="calculator" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Komponen Gaji</span>
-                            </a>
-                            <a href="/admin/transactions"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/transactions*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="arrow-left-right" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Transaksi</span>
-                            </a>
-                            <a href="/admin/fund-transfers"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/fund-transfers*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="repeat" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Transfer Dana</span>
-                            </a>
-                            <a href="/admin/payroll-periods"
-                               class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ request()->is('admin/payroll-periods*') ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
-                                <i data-lucide="calendar" class="w-4 h-4 min-w-[16px]"></i>
-                                <span class="text-xs">Periode Gaji</span>
-                            </a>
+                            @foreach($financeRoutes as $item)
+                                @php
+                                    $routeParams = $item['params'] ?? [];
+                                    $isActive = request()->routeIs($item['route']) || (isset($item['route']) && request()->routeIs($item['route'] . '.*'));
+                                @endphp
+                                <a href="{{ route($item['route'], $routeParams) }}"
+                                   class="flex items-center gap-3 px-4 py-[8px] rounded-admin-md transition-all duration-150 {{ $isActive ? 'bg-admin-indigo-tint text-admin-indigo font-semibold' : 'text-admin-slate hover:bg-admin-canvas hover:text-admin-ink' }}">
+                                    <i data-lucide="{{ $item['icon'] }}" class="w-4 h-4 min-w-[16px]"></i>
+                                    <span class="text-xs">{{ $item['label'] }}</span>
+                                </a>
+                            @endforeach
                         </div>
                     </div>
                 @elseif($user->isSensei())
@@ -253,10 +234,10 @@
 
     <!-- Session Flash Messages -->
     @if(session('success'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: '{{ session('success') }}', type: 'success' }) }, 100)"></div>
+        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('success')), type: 'success' }) }, 100)"></div>
     @endif
     @if(session('error'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: '{{ session('error') }}', type: 'error' }) }, 100)"></div>
+        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('error')), type: 'error' }) }, 100)"></div>
     @endif
 
     @stack('scripts')

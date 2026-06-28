@@ -4,6 +4,16 @@
 
 @section('content')
 <div class="space-y-8 animate-fade-in-up">
+    <!-- Mode Toggle -->
+    <div class="flex items-center gap-2 bg-admin-surface border border-admin-border rounded-admin-lg p-2 w-fit">
+        <a href="{{ route('dashboard', ['mode' => 'absensi']) }}" class="px-4 py-2 rounded-admin-md text-sm font-medium transition-colors bg-admin-indigo text-white">
+            <i data-lucide="clipboard-check" class="w-4 h-4 inline-block mr-1.5"></i>Absensi
+        </a>
+        <a href="{{ route('dashboard', ['mode' => 'keuangan']) }}" class="px-4 py-2 rounded-admin-md text-sm font-medium transition-colors text-admin-slate hover:text-admin-ink hover:bg-admin-canvas">
+            <i data-lucide="wallet" class="w-4 h-4 inline-block mr-1.5"></i>Keuangan
+        </a>
+    </div>
+
     <!-- Welcome Card (Premium CTA - Gradient allowed) -->
     <div class="bg-gradient-to-r from-admin-indigo to-admin-indigo-deep rounded-admin-lg p-6 text-white">
         <h2 class="text-xl font-semibold">Selamat Datang, {{ auth()->user()->name }}!</h2>

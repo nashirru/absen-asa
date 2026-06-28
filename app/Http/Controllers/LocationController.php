@@ -108,7 +108,10 @@ class LocationController extends Controller
             'allowed_roles' => $request->allowed_roles ?: null,
         ]);
 
-        $location->shifts()->delete();
+        // Only replace shifts if new shift data was provided (prevents data loss on partial updates)
+        if ($request->filled('shift1_name') || $request->filled('shift2_name')) {
+            $location->shifts()->delete();
+        }
 
         if ($request->filled('shift1_name')) {
             $location->shifts()->create([

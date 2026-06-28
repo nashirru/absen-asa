@@ -45,6 +45,9 @@ class KaryawanController extends Controller
             'jabatan' => 'required|string|max:255',
             'divisi' => 'nullable|string|max:255',
             'alamat' => 'nullable|string',
+            'base_salary' => 'nullable|numeric|min:0',
+            'join_date' => 'nullable|date',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
         $fotoFilename = null;
@@ -70,6 +73,9 @@ class KaryawanController extends Controller
             'jabatan' => $validated['jabatan'],
             'divisi' => $validated['divisi'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
+            'base_salary' => $validated['base_salary'] ?? 0,
+            'join_date' => $validated['join_date'] ?? now(),
+            'status' => $validated['status'] ?? 'active',
         ]);
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan.');
@@ -93,6 +99,9 @@ class KaryawanController extends Controller
             'jabatan' => 'required|string|max:255',
             'divisi' => 'nullable|string|max:255',
             'alamat' => 'nullable|string',
+            'base_salary' => 'nullable|numeric|min:0',
+            'join_date' => 'nullable|date',
+            'status' => 'nullable|in:active,inactive',
         ]);
 
         $user = $karyawan->user;
@@ -123,6 +132,9 @@ class KaryawanController extends Controller
             'jabatan' => $validated['jabatan'],
             'divisi' => $validated['divisi'] ?? null,
             'alamat' => $validated['alamat'] ?? null,
+            'base_salary' => $validated['base_salary'] ?? 0,
+            'join_date' => $validated['join_date'],
+            'status' => $validated['status'] ?? 'active',
         ]);
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil diupdate.');

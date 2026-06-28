@@ -77,12 +77,16 @@ class ReportController extends Controller
             $month = (int) $request->get('month', now()->month);
             $year = (int) $request->get('year', now()->year);
             
+            // Single query for all attendance data instead of N+1
+            $allAbsensi = Absensi::whereIn('user_id', $karyawans->pluck('user_id')->filter())
+                ->whereYear('tanggal', $year)
+                ->whereMonth('tanggal', $month)
+                ->get()
+                ->groupBy('user_id');
+
             foreach ($karyawans as $k) {
                 if (!$k->user) continue;
-                $userAbsensi = Absensi::where('user_id', $k->user_id)
-                    ->whereYear('tanggal', $year)
-                    ->whereMonth('tanggal', $month)
-                    ->get();
+                $userAbsensi = $allAbsensi->get($k->user_id, collect());
                     
                 $present = $userAbsensi->whereIn('status', ['hadir', 'terlambat'])->count();
                 $late = $userAbsensi->where('status', 'terlambat')->count();

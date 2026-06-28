@@ -37,6 +37,8 @@
                         <th class="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-admin-slate">NIK</th>
                         <th class="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-admin-slate">Jabatan</th>
                         <th class="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-admin-slate">Divisi</th>
+                        <th class="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-admin-slate text-right">Gaji Pokok</th>
+                        <th class="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-admin-slate">Status</th>
                         <th class="py-4 px-6 text-xs font-semibold uppercase tracking-wider text-admin-slate text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -52,6 +54,12 @@
                             <td class="py-4 px-6 text-sm text-admin-slate">{{ $k->nik }}</td>
                             <td class="py-4 px-6 text-sm text-admin-ink">{{ $k->jabatan }}</td>
                             <td class="py-4 px-6 text-sm text-admin-slate">{{ $k->divisi }}</td>
+                            <td class="py-4 px-6 text-sm text-right font-mono text-admin-ink">Rp {{ number_format($k->base_salary ?? 0, 0, ',', '.') }}</td>
+                            <td class="py-4 px-6 text-sm">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-admin-full text-xs font-medium {{ ($k->status ?? 'active') == 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                    {{ ($k->status ?? 'active') == 'active' ? 'Aktif' : 'Nonaktif' }}
+                                </span>
+                            </td>
                             <td class="py-4 px-6 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <a href="{{ route('karyawan.edit', $k) }}" class="p-2 rounded-admin-md border border-admin-border text-admin-indigo hover:bg-admin-indigo-tint hover:border-admin-indigo/20 transition-all duration-150" title="Edit">
@@ -68,7 +76,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="py-12 text-center text-admin-mist">
+                            <td colspan="7" class="py-12 text-center text-admin-mist">
                                 <i data-lucide="users" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
                                 <p class="text-sm">Belum ada data karyawan</p>
                             </td>

@@ -9,6 +9,7 @@ class SalaryComponent extends Model
 {
     protected $fillable = [
         "employee_id",
+        "karyawan_id",
         "name",
         "type",
         "amount",
@@ -24,5 +25,10 @@ class SalaryComponent extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function karyawan(): BelongsTo
+    {
+        return $this->belongsTo(Karyawan::class);
     }
 }

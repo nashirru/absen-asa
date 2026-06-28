@@ -517,7 +517,7 @@ class AbsensiController extends Controller
 
         $existingAbsensi = Absensi::where('user_id', $user->id)
             ->where('tanggal', $today)
-            ->where('shift', $shift)
+            ->where('is_lembur', true)
             ->first();
 
         $userRole = $user->role;
@@ -683,16 +683,6 @@ class AbsensiController extends Controller
         return $filename;
     }
 
-    /**
-     * Detect shift based on current time.
-     */
-    private function detectShift(): string
-    {
-        $now = Carbon::now();
-        $hour = (int) $now->format('H');
-        return $hour < 12 ? 'pagi' : 'siang';
-    }
 }
-
 
 

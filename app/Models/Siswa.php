@@ -15,6 +15,8 @@ class Siswa extends Model
         'tanggal_lahir',
         'alamat',
         'kelas_id',
+        'progress_pelatihan',
+        'nilai_pelatihan',
     ];
 
     protected function casts(): array

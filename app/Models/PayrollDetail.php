@@ -10,6 +10,7 @@ class PayrollDetail extends Model
     protected $fillable = [
         "payroll_period_id",
         "employee_id",
+        "karyawan_id",
         "base_salary",
         "total_allowance",
         "total_deduction",
@@ -38,5 +39,10 @@ class PayrollDetail extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function karyawan(): BelongsTo
+    {
+        return $this->belongsTo(Karyawan::class);
     }
 }

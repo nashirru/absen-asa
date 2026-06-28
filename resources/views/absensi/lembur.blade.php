@@ -117,15 +117,15 @@
                 <div class="grid grid-cols-3 gap-2">
                     <div class="bg-slate-50 rounded-lg p-3 text-center">
                         <p class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Lat</p>
-                        <p class="text-xs font-mono font-semibold text-slate-700 mt-1" x-text="lat ? lat.toFixed(5) : 'â€”'"></p>
+                        <p class="text-xs font-mono font-semibold text-slate-700 mt-1" x-text="lat ? lat.toFixed(5) : '—'"></p>
                     </div>
                     <div class="bg-slate-50 rounded-lg p-3 text-center">
                         <p class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Lng</p>
-                        <p class="text-xs font-mono font-semibold text-slate-700 mt-1" x-text="lng ? lng.toFixed(5) : 'â€”'"></p>
+                        <p class="text-xs font-mono font-semibold text-slate-700 mt-1" x-text="lng ? lng.toFixed(5) : '—'"></p>
                     </div>
                     <div class="bg-slate-50 rounded-lg p-3 text-center">
                         <p class="text-[10px] font-medium uppercase tracking-wider text-slate-400">Akurasi</p>
-                        <p class="text-xs font-mono font-semibold text-slate-700 mt-1" x-text="accuracy ? accuracy.toFixed(0) + 'm' : 'â€”'"></p>
+                        <p class="text-xs font-mono font-semibold text-slate-700 mt-1" x-text="accuracy ? accuracy.toFixed(0) + 'm' : '—'"></p>
                     </div>
                 </div>
 

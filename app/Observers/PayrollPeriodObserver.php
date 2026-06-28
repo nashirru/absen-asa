@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Models\Employee;
+use App\Models\Karyawan;
 use App\Models\PayrollDetail;
 use App\Models\PayrollPeriod;
 
@@ -15,24 +15,24 @@ class PayrollPeriodObserver
             return;
         }
 
-        $activeEmployees = Employee::where('status', 'active')->get();
+        $activeKaryawans = Karyawan::where('status', 'active')->get();
 
-        foreach ($activeEmployees as $employee) {
+        foreach ($activeKaryawans as $karyawan) {
             // Calculate allowances and deductions
-            $allowances = $employee->salaryComponents()
+            $allowances = $karyawan->salaryComponents()
                 ->where('type', 'allowance')
                 ->sum('amount');
 
-            $deductions = $employee->salaryComponents()
+            $deductions = $karyawan->salaryComponents()
                 ->where('type', 'deduction')
                 ->sum('amount');
 
-            $baseSalary = $employee->base_salary;
+            $baseSalary = $karyawan->base_salary;
             $netSalary = $baseSalary + $allowances - $deductions;
 
             PayrollDetail::create([
                 'payroll_period_id' => $payrollPeriod->id,
-                'employee_id' => $employee->id,
+                'karyawan_id' => $karyawan->id,
                 'base_salary' => $baseSalary,
                 'total_allowance' => $allowances,
                 'total_deduction' => $deductions,

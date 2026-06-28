@@ -33,6 +33,13 @@ class Absensi extends Model
         'jam_lembur_mulai',
         'jam_lembur_selesai',
         'durasi_lembur',
+        'latitude_keluar',
+        'longitude_keluar',
+        'accuracy_keluar',
+        'distance_keluar',
+        'is_mocked',
+        'is_anomaly',
+        'anomaly_details',
     ];
 
     protected function casts(): array
@@ -45,6 +52,9 @@ class Absensi extends Model
             'distance' => 'decimal:2',
             'radius' => 'decimal:2',
             'is_approved' => 'boolean',
+            'is_lembur' => 'boolean',
+            'is_mocked' => 'boolean',
+            'is_anomaly' => 'boolean',
         ];
     }
 

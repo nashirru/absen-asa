@@ -25,6 +25,29 @@
                     <textarea name="alamat" rows="2" placeholder="Alamat" class="w-full px-4 py-2.5 bg-admin-canvas border border-admin-border rounded-admin-md text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">{{ old('alamat', $karyawan->alamat ?? '') }}</textarea>
                 </div>
             </fieldset>
+            <fieldset class="border border-admin-border rounded-admin-md p-4">
+                <legend class="text-xs font-bold uppercase tracking-wider text-admin-indigo px-2">Data Penggajian</legend>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs font-semibold text-admin-slate">Gaji Pokok</label>
+                        <input type="number" step="0.01" name="base_salary" value="{{ old('base_salary', $karyawan->base_salary ?? '') }}" min="0" placeholder="Rp 0"
+                               class="w-full mt-1 px-4 py-2.5 bg-admin-canvas border border-admin-border rounded-admin-md text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-admin-slate">Tanggal Masuk</label>
+                        <input type="date" name="join_date" value="{{ old('join_date', isset($karyawan) && $karyawan->join_date ? $karyawan->join_date->format('Y-m-d') : '') }}"
+                               class="w-full mt-1 px-4 py-2.5 bg-admin-canvas border border-admin-border rounded-admin-md text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-admin-slate">Status</label>
+                        <select name="status"
+                                class="w-full mt-1 px-4 py-2.5 bg-admin-canvas border border-admin-border rounded-admin-md text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                            <option value="active" {{ old('status', $karyawan->status ?? '') == 'active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="inactive" {{ old('status', $karyawan->status ?? '') == 'inactive' ? 'selected' : '' }}>Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
             <div class="flex gap-3 pt-2">
                 <a href="{{ route('karyawan.index') }}" class="flex-1 py-3 text-center rounded-admin-md border border-admin-border font-semibold text-sm hover:bg-admin-canvas transition-colors">Batal</a>
                 <button type="submit" class="flex-1 py-3 bg-admin-indigo text-white rounded-admin-md font-semibold text-sm hover:bg-admin-indigo-deep transition-colors">Simpan</button>

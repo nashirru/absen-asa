@@ -6,7 +6,6 @@ use App\Models\Account;
 use App\Models\Transaction;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Carbon;
 
 class DashboardPdfController extends Controller

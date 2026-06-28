@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slip Gaji - {{ $payrollDetail->employee->name }} - {{ $payrollDetail->payrollPeriod->month }}/{{ $payrollDetail->payrollPeriod->year }}</title>
+    <title>Slip Gaji - {{ $employeeName }} - {{ $payrollDetail->payrollPeriod->month }}/{{ $payrollDetail->payrollPeriod->year }}</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -251,7 +251,7 @@
         <div class="employee-details">
             <div class="detail-group">
                 <span class="detail-label">Nama Karyawan</span>
-                <span class="detail-value">: {{ $payrollDetail->employee->name }}</span>
+                <span class="detail-value">: {{ $employeeName }}</span>
             </div>
             <div class="detail-group">
                 <span class="detail-label">Tanggal Bayar</span>
@@ -259,11 +259,11 @@
             </div>
             <div class="detail-group">
                 <span class="detail-label">Jabatan</span>
-                <span class="detail-value">: {{ $payrollDetail->employee->position }}</span>
+                <span class="detail-value">: {{ $payrollDetail->karyawan?->jabatan ?? '-' }}</span>
             </div>
             <div class="detail-group">
                 <span class="detail-label">Departemen</span>
-                <span class="detail-value">: {{ $payrollDetail->employee->department ?? '-' }}</span>
+                <span class="detail-value">: {{ $payrollDetail->karyawan?->divisi ?? '-' }}</span>
             </div>
         </div>
 
@@ -321,7 +321,7 @@
         <div class="signatures">
             <div>
                 <div class="signature-title">Diterima Oleh,</div>
-                <div class="signature-name">{{ $payrollDetail->employee->name }}</div>
+                <div class="signature-name">{{ $employeeName }}</div>
             </div>
             <div>
                 <div class="signature-title">Disetujui Oleh,</div>

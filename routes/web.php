@@ -3,6 +3,14 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardPdfController;
+use App\Http\Controllers\Finance\AccountController;
+use App\Http\Controllers\Finance\CategoryController;
+use App\Http\Controllers\Finance\EmployeeController;
+use App\Http\Controllers\Finance\FundTransferController;
+use App\Http\Controllers\Finance\PayrollPeriodController;
+use App\Http\Controllers\Finance\SalaryComponentController;
+use App\Http\Controllers\Finance\TransactionController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\KaryawanController;
@@ -16,7 +24,6 @@ use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PayrollSlipController;
 use App\Http\Controllers\ReportPrintController;
-use App\Http\Controllers\DashboardPdfController;
 use Illuminate\Support\Facades\Route;
 
 // Auth Routes
@@ -35,6 +42,19 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/payroll-details/{payrollDetail}/slip', [PayrollSlipController::class, 'show'])->name('payroll.slip');
         Route::get('/admin/reports/print', [ReportPrintController::class, 'show'])->name('reports.print');
         Route::get('/admin/dashboard/pdf', [DashboardPdfController::class, 'export'])->name('dashboard.pdf');
+
+        // Finance CRUD (Blade)
+        Route::resource('finance/accounts', AccountController::class)->names('finance.accounts');
+        Route::resource('finance/categories', CategoryController::class)->names('finance.categories');
+        Route::resource('finance/salary-components', SalaryComponentController::class)->names('finance.salary-components');
+        Route::resource('finance/transactions', TransactionController::class)->names('finance.transactions');
+        Route::get('finance/transactions/categories-by-type', [TransactionController::class, 'getCategoriesByType'])->name('finance.transactions.categories-by-type');
+        Route::resource('finance/fund-transfers', FundTransferController::class)->names('finance.fund-transfers');
+        Route::resource('finance/payroll-periods', PayrollPeriodController::class)->names('finance.payroll-periods');
+        Route::post('finance/payroll-periods/{payrollPeriod}/process', [PayrollPeriodController::class, 'process'])->name('finance.payroll-periods.process');
+        Route::post('finance/payroll-periods/{payrollPeriod}/pay', [PayrollPeriodController::class, 'pay'])->name('finance.payroll-periods.pay');
+        Route::put('finance/payroll-details/{payrollDetail}', [PayrollPeriodController::class, 'updatePayrollDetail'])->name('finance.payroll-details.update');
+        Route::delete('finance/payroll-details/{payrollDetail}', [PayrollPeriodController::class, 'destroyPayrollDetail'])->name('finance.payroll-details.destroy');
     });
 
     // Profile (All roles)

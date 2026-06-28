@@ -98,10 +98,10 @@
 
     <!-- Session Flash Messages -->
     @if(session('success'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: '{{ session('success') }}', type: 'success' }) }, 100)"></div>
+        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('success')), type: 'success' }) }, 100)"></div>
     @endif
     @if(session('error'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: '{{ session('error') }}', type: 'error' }) }, 100)"></div>
+        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('error')), type: 'error' }) }, 100)"></div>
     @endif
 
     @stack('scripts')

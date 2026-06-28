@@ -127,8 +127,8 @@
                 @endphp
                 <tr>
                     <td>{{ $no++ }}</td>
-                    <td style="font-weight: 500;">{{ $detail->employee->name }}</td>
-                    <td>{{ $detail->employee->position }}</td>
+                    <td style="font-weight: 500;">{{ $detail->karyawan?->user?->name ?? 'PAY-' . $detail->karyawan?->nik }}</td>
+                    <td>{{ $detail->karyawan?->jabatan ?? '-' }}</td>
                     <td class="num">Rp {{ number_format($detail->base_salary, 0, ',', '.') }}</td>
                     <td class="num">Rp {{ number_format($detail->total_allowance, 0, ',', '.') }}</td>
                     <td class="num">Rp {{ number_format($detail->total_deduction, 0, ',', '.') }}</td>

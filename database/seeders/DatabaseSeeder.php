@@ -158,5 +158,8 @@ class DatabaseSeeder extends Seeder
         foreach ($settings as $s) {
             Setting::create($s);
         }
+
+        // Data Keuangan (Akun, Kategori, Transaksi, Komponen Gaji, Periode Gaji)
+        $this->call(FinanceDatabaseSeeder::class);
     }
 }
