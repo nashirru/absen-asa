@@ -25,4 +25,9 @@ class PayrollPeriod extends Model
     {
         return $this->hasMany(PayrollDetail::class);
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'ref_payroll_id');
+    }
 }

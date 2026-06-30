@@ -9,24 +9,27 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Fix salary_components FK (column exists but constraint might not)
-        try {
+        // ============================================================
+        // 1. Add karyawan_id columns (if not already present)
+        // ============================================================
+        if (!Schema::hasColumn('salary_components', 'karyawan_id')) {
             Schema::table('salary_components', function (Blueprint $table) {
-                $table->foreign('karyawan_id')->references('id')->on('karyawan')->cascadeOnDelete();
+                $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->cascadeOnDelete()->after('id');
+                $table->index('karyawan_id');
             });
-        } catch (\Exception $e) {
-            // Constraint may already exist
         }
 
-        // Add karyawan_id to payroll_details if not exists
         if (!Schema::hasColumn('payroll_details', 'karyawan_id')) {
             Schema::table('payroll_details', function (Blueprint $table) {
                 $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->cascadeOnDelete()->after('id');
+                $table->index('karyawan_id');
             });
         }
 
-        // Migrate data (only if employees table still has data)
-        if (Schema::hasTable('employees')) {
+        // ============================================================
+        // 2. Migrate data from employees to karyawan
+        // ============================================================
+        if (Schema::hasTable('employees') && DB::table('employees')->count() > 0) {
             $employees = DB::table('employees')->get();
             foreach ($employees as $employee) {
                 $karyawan = DB::table('karyawan')
@@ -36,6 +39,7 @@ return new class extends Migration
                     ->first();
 
                 if ($karyawan) {
+                    // Update existing karyawan with employee data
                     DB::table('karyawan')
                         ->where('id', $karyawan->id)
                         ->update([
@@ -45,38 +49,84 @@ return new class extends Migration
                         ]);
                     $karyawanId = $karyawan->id;
                 } else {
-                    $karyawanId = DB::table('karyawan')->insertGetId([
-                        'user_id' => null,
-                        'nik' => 'PAY-' . str_pad($employee->id, 4, '0', STR_PAD_LEFT),
-                        'jabatan' => $employee->position,
-                        'divisi' => $employee->department ?? 'Umum',
-                        'alamat' => null,
-                        'base_salary' => $employee->base_salary,
-                        'join_date' => $employee->join_date,
-                        'status' => $employee->status,
-                        'created_at' => $employee->created_at ?? now(),
-                        'updated_at' => $employee->updated_at ?? now(),
-                    ]);
+                    // Skip employees without a matching user account
+                    // to avoid creating orphaned karyawan records with user_id = null
+                    continue;
                 }
 
+                // Link salary_components to the karyawan record
                 DB::table('salary_components')
                     ->where('employee_id', $employee->id)
                     ->whereNull('karyawan_id')
                     ->update(['karyawan_id' => $karyawanId]);
 
+                // Link payroll_details to the karyawan record
                 DB::table('payroll_details')
                     ->where('employee_id', $employee->id)
                     ->update(['karyawan_id' => $karyawanId]);
             }
         }
+
+        // ============================================================
+        // 3. Clean up employee_id column from salary_components
+        // ============================================================
+        if (Schema::hasColumn('salary_components', 'employee_id')) {
+            try {
+                Schema::table('salary_components', function (Blueprint $table) {
+                    $table->dropForeign(['employee_id']);
+                });
+            } catch (\Exception $e) {
+                // FK constraint may not exist
+            }
+
+            Schema::table('salary_components', function (Blueprint $table) {
+                $table->dropColumn('employee_id');
+            });
+        }
+
+        // ============================================================
+        // 4. Clean up employee_id column from payroll_details
+        // ============================================================
+        if (Schema::hasColumn('payroll_details', 'employee_id')) {
+            try {
+                Schema::table('payroll_details', function (Blueprint $table) {
+                    $table->dropForeign(['employee_id']);
+                });
+            } catch (\Exception $e) {
+                // FK constraint may not exist
+            }
+
+            Schema::table('payroll_details', function (Blueprint $table) {
+                $table->dropColumn('employee_id');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('salary_components', function (Blueprint $table) {
-            $table->dropForeign(['karyawan_id']);
-        });
+        // Restore employee_id to salary_components
+        if (!Schema::hasColumn('salary_components', 'employee_id')) {
+            Schema::table('salary_components', function (Blueprint $table) {
+                $table->foreignId('employee_id')->nullable()->constrained('employees')->cascadeOnDelete()->after('id');
+            });
+        }
 
+        // Restore employee_id to payroll_details
+        if (!Schema::hasColumn('payroll_details', 'employee_id')) {
+            Schema::table('payroll_details', function (Blueprint $table) {
+                $table->foreignId('employee_id')->nullable()->constrained('employees')->cascadeOnDelete()->after('id');
+            });
+        }
+
+        // Drop karyawan_id FK and column from salary_components
+        if (Schema::hasColumn('salary_components', 'karyawan_id')) {
+            Schema::table('salary_components', function (Blueprint $table) {
+                $table->dropForeign(['karyawan_id']);
+                $table->dropColumn('karyawan_id');
+            });
+        }
+
+        // Drop karyawan_id FK and column from payroll_details
         if (Schema::hasColumn('payroll_details', 'karyawan_id')) {
             Schema::table('payroll_details', function (Blueprint $table) {
                 $table->dropForeign(['karyawan_id']);

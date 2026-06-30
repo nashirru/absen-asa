@@ -50,6 +50,7 @@ php artisan test
 php artisan storage:link    # Create public/storage → storage/app/public symlink
 php artisan queue:listen    # Process queue jobs (session/cache expiry, etc.)
 php artisan pail            # Tail log file (dev only)
+git rm --cached <file>      # Remove tracked files that should be ignored
 ```
 
 ## Architecture
@@ -83,11 +84,12 @@ All users in single `users` table with `role` column. Person-specific data in se
 - **Payroll**: Employees, Salary Components, Payroll Periods (auto-generates payroll details for active employees, linked transactions)
 - Observers in `app/Observers/`: TransactionObserver, FundTransferObserver, PayrollPeriodObserver
 
-### UI
-- **Attendance/Scheduling**: Blade views + Tailwind CSS (not Filament)
-- **Finance/Payroll**: Filament resources with custom pages and widgets
-- **Dashboards**: Role-based, single `DashboardController` dispatches different views
-- **Locale**: Indonesian (Carbon locale set in AppServiceProvider)
+### UI Guidelines (DESAIN.md)
+Two design surfaces:
+- **Admin Console** (Super Admin/Admin) — desktop-first, indigo `#6D5DFC`, flat cards (1px borders, no shadows), Inter typeface
+- **Member App** (Siswa/Karyawan/Sensei) — mobile-first PWA, blue `#1A6DFF`, soft-shadow floating cards, Plus Jakarta Sans
+- **No emoji** in code — use CSS-based indicators (badges with Tailwind classes via `getStatusBadgeAttribute()`)
+- Base spacing unit: 8px
 
 ### Models (`app/Models/`)
 - **User** → hasOne(Siswa|Karyawan|Sensei), hasMany(Absensi)
@@ -95,6 +97,7 @@ All users in single `users` table with `role` column. Person-specific data in se
 - **Sensei** → belongsTo(User), hasMany(Kelas|Jadwal)
 - **Karyawan** → belongsTo(User)
 - **Absensi** → belongsTo(User|Location|Shift), soft deletes
+- **PayrollPeriod** → hasMany(PayrollDetail|Transaction)
 - **Setting** key-value store for app config (coordinates, radius, hours)
 - Finance: Account→Transaction, Account→FundTransfer, Category→Transaction, Employee→SalaryComponent→PayrollDetail, PayrollPeriod→PayrollDetail
 
@@ -104,9 +107,38 @@ All users in single `users` table with `role` column. Person-specific data in se
 - Session/Cache/Queue: database driver
 - Vite with Tailwind CSS v4 via `@tailwindcss/vite`
 
+## Audit Results (2026-06-29)
+
+**Skor: 72/100 — DITOLAK** (belum siap produksi penuh)
+
+### Issues Found & Fixed
+
+| Issue | Severity | Status |
+|-------|----------|--------|
+| N+1 query di PayrollPeriodObserver (salaryComponents dalam loop) | TINGGI | ✅ Fixed |
+| N+1 query di ReportPrintController (Transaction per foreach) | TINGGI | ✅ Fixed |
+| Emoji HTML entities di Absensi model (inkonsisten DESAIN.md) | RENDAH | ✅ Fixed |
+| .env.example masih default Laravel (APP_DEBUG=true, sqlite, locale en) | SEDANG | ✅ Fixed |
+| .gitignore tidak lengkap (composer.phar, *.sql, *.zip, dll tracked) | SEDANG | ✅ Fixed |
+| Kurang composite index untuk query umum (absensi, transactions) | SEDANG | ✅ Fixed (migration baru) |
+| composer.phar & composer-setup.php tracked di git | SEDANG | ✅ Fixed (git rm --cached) |
+
+### Issues Butuh Tindakan Manual
+
+| Issue | Severity | Rekomendasi |
+|-------|----------|-------------|
+| Tidak ada test coverage (skor 15/100) | KRITIS | Buat Feature/Unit test untuk AuthController, AbsensiController, RoleMiddleware, Finance |
+| AbsensiController (689 baris) & DashboardController (598 baris) terlalu panjang | SEDANG | Pisahkan logic ke Service classes |
+| Tidak ada try/catch di controllers | SEDANG | Tambahkan global exception handler di AppServiceProvider |
+| Tidak ada rate limiting login/check-in | SEDANG | Tambahkan throttle middleware ke route login & absensi |
+| Validasi password hanya min:6 | RENDAH | Naikkan ke min:8 |
+| Upload selfie tanpa validasi tipe file (base64) | RENDAH | Validasi magic bytes, bukan hanya prefix data:image |
+
 ## Known Issues / Gotchas
 
 - **DummyAbsensiSeeder** exists but is NOT called from DatabaseSeeder — run manually if needed
 - Composer dev script uses `concurrently` (npm package) for parallel processes
 - No automated test coverage yet (placeholder tests only)
 - Filament resources auto-discover — register new resources in the default panel
+- `.env` aman (tidak di-track git) tapi pastikan tidak pernah di `git add` secara manual
+- `composer.phar` dan `composer-setup.php` sudah dihapus dari tracking — jalankan `git commit` untuk finalisasi

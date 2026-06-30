@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Karyawan;
+use App\Models\Sensei;
+use App\Models\Siswa;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -66,9 +69,36 @@ class UserController extends Controller
         $validated['password'] = Hash::make($validated['password']);
         $validated['status_aktif'] = $request->has('status_aktif');
 
-        User::create($validated);
+        $user = User::create($validated);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
+        // Auto-create role-specific record
+        $extraMsg = '';
+        if ($user->role === 'karyawan') {
+            Karyawan::create([
+                'user_id' => $user->id,
+                'nik' => 'AUTO-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                'jabatan' => '-',
+                'status' => 'active',
+                'join_date' => now(),
+            ]);
+            $extraMsg = ' Lengkapi data di menu Karyawan.';
+        } elseif ($user->role === 'siswa') {
+            Siswa::create([
+                'user_id' => $user->id,
+                'nis' => 'AUTO-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                'gender' => 'L',
+                'tanggal_lahir' => now(),
+            ]);
+            $extraMsg = ' Lengkapi data di menu Siswa.';
+        } elseif ($user->role === 'sensei') {
+            Sensei::create([
+                'user_id' => $user->id,
+                'mata_pelajaran' => '-',
+            ]);
+            $extraMsg = ' Lengkapi data di menu Sensei.';
+        }
+
+        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.' . $extraMsg);
     }
 
     public function edit(User $user)
@@ -115,9 +145,51 @@ class UserController extends Controller
 
         $validated['status_aktif'] = $request->has('status_aktif');
 
+        $oldRole = $user->role;
         $user->update($validated);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil diupdate.');
+        // Handle role change: auto-create or remove role-specific records
+        $extraMsg = '';
+        $newRole = $user->role;
+
+        // Remove old role record if role changed
+        if ($oldRole !== $newRole) {
+            if ($oldRole === 'karyawan' && $user->karyawan) {
+                $user->karyawan->delete();
+            } elseif ($oldRole === 'siswa' && $user->siswa) {
+                $user->siswa->delete();
+            } elseif ($oldRole === 'sensei' && $user->sensei) {
+                $user->sensei->delete();
+            }
+        }
+
+        // Create new role record if needed
+        if ($newRole === 'karyawan' && !$user->karyawan) {
+            Karyawan::create([
+                'user_id' => $user->id,
+                'nik' => 'AUTO-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                'jabatan' => '-',
+                'status' => 'active',
+                'join_date' => now(),
+            ]);
+            $extraMsg = ' Lengkapi data di menu Karyawan.';
+        } elseif ($newRole === 'siswa' && !$user->siswa) {
+            Siswa::create([
+                'user_id' => $user->id,
+                'nis' => 'AUTO-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
+                'gender' => 'L',
+                'tanggal_lahir' => now(),
+            ]);
+            $extraMsg = ' Lengkapi data di menu Siswa.';
+        } elseif ($newRole === 'sensei' && !$user->sensei) {
+            Sensei::create([
+                'user_id' => $user->id,
+                'mata_pelajaran' => '-',
+            ]);
+            $extraMsg = ' Lengkapi data di menu Sensei.';
+        }
+
+        return redirect()->route('users.index')->with('success', 'User berhasil diupdate.' . $extraMsg);
     }
 
     public function destroy(User $user)
@@ -130,6 +202,15 @@ class UserController extends Controller
         // Cannot delete self
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Tidak bisa menghapus akun sendiri.');
+        }
+
+        // Hapus role-specific record terlebih dahulu
+        if ($user->role === 'karyawan' && $user->karyawan) {
+            $user->karyawan->delete();
+        } elseif ($user->role === 'siswa' && $user->siswa) {
+            $user->siswa->delete();
+        } elseif ($user->role === 'sensei' && $user->sensei) {
+            $user->sensei->delete();
         }
 
         if ($user->foto && file_exists(public_path('uploads/foto/' . $user->foto))) {

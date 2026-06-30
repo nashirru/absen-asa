@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class SalaryComponent extends Model
 {
     protected $fillable = [
-        "employee_id",
         "karyawan_id",
         "name",
         "type",
@@ -20,11 +19,6 @@ class SalaryComponent extends Model
         return [
             "amount" => "decimal:2",
         ];
-    }
-
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
     }
 
     public function karyawan(): BelongsTo

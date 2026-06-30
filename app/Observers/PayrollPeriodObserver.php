@@ -15,22 +15,27 @@ class PayrollPeriodObserver
             return;
         }
 
-        $activeKaryawans = Karyawan::where('status', 'active')->get();
+        $activeKaryawans = Karyawan::where('status', 'active')
+            ->with('salaryComponents')
+            ->get();
+
+        $insertData = [];
 
         foreach ($activeKaryawans as $karyawan) {
-            // Calculate allowances and deductions
-            $allowances = $karyawan->salaryComponents()
+            $baseSalary = $karyawan->base_salary;
+
+            // Calculate allowances and deductions from loaded relation
+            $allowances = $karyawan->salaryComponents
                 ->where('type', 'allowance')
                 ->sum('amount');
 
-            $deductions = $karyawan->salaryComponents()
+            $deductions = $karyawan->salaryComponents
                 ->where('type', 'deduction')
                 ->sum('amount');
 
-            $baseSalary = $karyawan->base_salary;
             $netSalary = $baseSalary + $allowances - $deductions;
 
-            PayrollDetail::create([
+            $insertData[] = [
                 'payroll_period_id' => $payrollPeriod->id,
                 'karyawan_id' => $karyawan->id,
                 'base_salary' => $baseSalary,
@@ -38,7 +43,14 @@ class PayrollPeriodObserver
                 'total_deduction' => $deductions,
                 'bonus' => 0,
                 'net_salary' => $netSalary,
-            ]);
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // Bulk insert for performance
+        if (!empty($insertData)) {
+            PayrollDetail::insert($insertData);
         }
     }
 

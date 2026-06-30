@@ -6,6 +6,15 @@
     @if(session('success'))
         <div class="mb-4 p-4 bg-admin-success-tint text-admin-success rounded-admin-md text-sm font-medium">{{ session('success') }}</div>
     @endif
+
+    {{-- Info banner --}}
+    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-admin-md text-sm flex items-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+        <span>Komponen gaji juga bisa diatur langsung dari halaman
+        <a href="{{ route('karyawan.index') }}" class="underline font-semibold">Data Karyawan</a>
+        — edit karyawan lalu atur tunjangan & potongan di bagian "Komponen Gaji".</span>
+    </div>
+
     <div class="bg-admin-surface border border-admin-border rounded-admin-lg">
         <div class="p-5 border-b border-admin-border flex flex-wrap items-center justify-between gap-3">
             <form method="GET" class="flex items-center gap-3">
@@ -37,7 +46,11 @@
                 <tbody class="divide-y divide-admin-border">
                     @forelse($components as $comp)
                     <tr class="hover:bg-admin-canvas/50 transition-colors">
-                        <td class="px-5 py-3.5 text-admin-ink font-medium">{{ $comp->karyawan?->user?->name ?? 'PAY-' . $comp->karyawan?->nik }}</td>
+                        <td class="px-5 py-3.5 text-admin-ink font-medium">
+                            <a href="{{ route('karyawan.edit', $comp->karyawan_id) }}" class="text-admin-indigo hover:underline">
+                                {{ $comp->karyawan?->user?->name ?? 'PAY-' . $comp->karyawan?->nik }}
+                            </a>
+                        </td>
                         <td class="px-5 py-3.5 text-admin-slate">{{ $comp->name }}</td>
                         <td class="px-5 py-3.5">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-admin-full text-xs font-medium {{ $comp->type == 'allowance' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
@@ -46,11 +59,7 @@
                         </td>
                         <td class="px-5 py-3.5 text-admin-ink text-right font-mono">Rp {{ number_format($comp->amount, 0, ',', '.') }}</td>
                         <td class="px-5 py-3.5 text-center">
-                            <a href="{{ route('finance.salary-components.edit', $comp) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium mr-2">Edit</a>
-                            <form method="POST" action="{{ route('finance.salary-components.destroy', $comp) }}" class="inline" onsubmit="return confirm('Hapus komponen ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium">Hapus</button>
-                            </form>
+                            <a href="{{ route('karyawan.edit', $comp->karyawan_id) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium">Ke Karyawan</a>
                         </td>
                     </tr>
                     @empty

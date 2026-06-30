@@ -10,10 +10,12 @@ return new class extends Migration
     {
         Schema::create("salary_components", function (Blueprint $table) {
             $table->id();
-            $table->foreignId("employee_id")->constrained()->cascadeOnDelete();
+            $table->foreignId("karyawan_id")->constrained("karyawan")->cascadeOnDelete();
             $table->string("name");
             $table->enum("type", ["allowance", "deduction"]);
             $table->decimal("amount", 15, 2)->default(0);
+            $table->index("type");
+            $table->index("karyawan_id");
             $table->timestamps();
         });
     }

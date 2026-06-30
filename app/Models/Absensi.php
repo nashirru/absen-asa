@@ -88,12 +88,12 @@ class Absensi extends Model
     public function getStatusIconAttribute(): string
     {
         return match ($this->status) {
-            'hadir' => '&#x2705;',
-            'terlambat' => '&#x1F7E1;',
-            'izin' => '&#x1F535;',
-            'sakit' => '&#x1F7E0;',
-            'alpha' => '&#x1F534;',
-            default => '&#x2753;',
+            'hadir' => 'hadir',
+            'terlambat' => 'terlambat',
+            'izin' => 'izin',
+            'sakit' => 'sakit',
+            'alpha' => 'alpha',
+            default => 'unknown',
         };
     }
 

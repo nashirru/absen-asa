@@ -94,16 +94,17 @@ class ReportPrintController extends Controller
 
             $data = ['income' => $income, 'expense' => $expense];
         } else {
-            $payrollPeriods = PayrollPeriod::with(['payrollDetails'])
+            $payrollPeriods = PayrollPeriod::with([
+                    'payrollDetails',
+                    'transactions.account',
+                ])
                 ->orderBy('year', 'desc')
                 ->orderBy('month', 'desc')
                 ->get();
 
             $items = [];
             foreach ($payrollPeriods as $period) {
-                $transaction = Transaction::where('ref_payroll_id', $period->id)
-                    ->with('account')
-                    ->first();
+                $transaction = $period->transactions->first();
 
                 $items[] = [
                     'period' => $period,

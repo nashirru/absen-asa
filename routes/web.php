@@ -110,8 +110,11 @@ Route::middleware('auth')->group(function () {
         // Siswa
         Route::resource('siswa', SiswaController::class);
 
-        // Karyawan
+        // Karyawan (dengan inline salary components)
         Route::resource('karyawan', KaryawanController::class);
+        Route::post('/karyawan/{karyawan}/salary-components', [KaryawanController::class, 'storeSalaryComponent'])->name('karyawan.salary-components.store');
+        Route::put('/karyawan/salary-components/{salaryComponent}', [KaryawanController::class, 'updateSalaryComponent'])->name('karyawan.salary-components.update');
+        Route::delete('/karyawan/salary-components/{salaryComponent}', [KaryawanController::class, 'destroySalaryComponent'])->name('karyawan.salary-components.destroy');
 
         // Sensei
         Route::resource('sensei', SenseiController::class);

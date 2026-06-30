@@ -3,13 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Models\Karyawan;
+use App\Models\SalaryComponent;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class KaryawanController extends Controller
 {
+    protected function isAjax(Request $request): bool
+    {
+        return $request->ajax() || $request->wantsJson();
+    }
+
+    protected function jsonOrRedirect($request, $redirectRoute, $message, $data = [])
+    {
+        if ($this->isAjax($request)) {
+            return response()->json(array_merge([
+                'message' => $message,
+                'success' => true,
+            ], $data));
+        }
+        return redirect()->route($redirectRoute)->with('success', $message);
+    }
+
     public function index(Request $request)
     {
         $query = Karyawan::with('user');
@@ -24,6 +42,11 @@ class KaryawanController extends Controller
         }
 
         $karyawan = $query->latest()->paginate(15)->withQueryString();
+
+        if ($this->isAjax($request)) {
+            $html = view('karyawan.partials.table', compact('karyawan'))->render();
+            return response()->json(['table_html' => $html, 'success' => true]);
+        }
 
         return view('karyawan.index', compact('karyawan'));
     }
@@ -78,12 +101,24 @@ class KaryawanController extends Controller
             'status' => $validated['status'] ?? 'active',
         ]);
 
+        // Re-render table for AJAX response
+        if ($this->isAjax($request)) {
+            $query = Karyawan::with('user')->latest()->paginate(15);
+            $tableHtml = view('karyawan.partials.table', compact('karyawan'))->with('karyawan', $query)->render();
+            return response()->json([
+                'message' => 'Karyawan berhasil ditambahkan!',
+                'success' => true,
+                'table_html' => $tableHtml,
+                'table_target' => 'table-container',
+            ]);
+        }
+
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil ditambahkan.');
     }
 
     public function edit(Karyawan $karyawan)
     {
-        $karyawan->load('user');
+        $karyawan->load(['user', 'salaryComponents']);
         return view('karyawan.edit', compact('karyawan'));
     }
 
@@ -137,6 +172,13 @@ class KaryawanController extends Controller
             'status' => $validated['status'] ?? 'active',
         ]);
 
+        if ($this->isAjax($request)) {
+            return response()->json([
+                'message' => 'Karyawan berhasil diupdate!',
+                'success' => true,
+            ]);
+        }
+
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil diupdate.');
     }
 
@@ -150,5 +192,71 @@ class KaryawanController extends Controller
         $user->delete();
 
         return redirect()->route('karyawan.index')->with('success', 'Karyawan berhasil dihapus.');
+    }
+
+    /**
+     * Store salary component inline from karyawan edit page.
+     */
+    public function storeSalaryComponent(Request $request, Karyawan $karyawan)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:allowance,deduction',
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $karyawan->salaryComponents()->create([
+            'name' => $validated['name'],
+            'type' => $validated['type'],
+            'amount' => $validated['amount'],
+        ]);
+
+        if ($this->isAjax($request)) {
+            return response()->json([
+                'message' => 'Komponen gaji berhasil ditambahkan!',
+                'success' => true,
+            ]);
+        }
+
+        return redirect()->route('karyawan.edit', $karyawan)
+            ->with('success', 'Komponen gaji berhasil ditambahkan.');
+    }
+
+    /**
+     * Update salary component inline from karyawan edit page.
+     */
+    public function updateSalaryComponent(Request $request, SalaryComponent $salaryComponent)
+    {
+        $karyawan = $salaryComponent->karyawan;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:allowance,deduction',
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $salaryComponent->update($validated);
+
+        return redirect()->route('karyawan.edit', $karyawan)
+            ->with('success', 'Komponen gaji berhasil diperbarui.');
+    }
+
+    /**
+     * Delete salary component inline from karyawan edit page.
+     */
+    public function destroySalaryComponent(Request $request, SalaryComponent $salaryComponent)
+    {
+        $karyawan = $salaryComponent->karyawan;
+        $salaryComponent->delete();
+
+        if ($this->isAjax($request)) {
+            return response()->json([
+                'message' => 'Komponen gaji berhasil dihapus!',
+                'success' => true,
+            ]);
+        }
+
+        return redirect()->route('karyawan.edit', $karyawan)
+            ->with('success', 'Komponen gaji berhasil dihapus.');
     }
 }

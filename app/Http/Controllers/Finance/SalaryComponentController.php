@@ -42,10 +42,22 @@ class SalaryComponentController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
-        SalaryComponent::create($validated);
+        try {
+            SalaryComponent::create($validated);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan komponen gaji: ' . $e->getMessage());
+        }
 
         return redirect()->route('finance.salary-components.index')
             ->with('success', 'Komponen gaji berhasil dibuat.');
+    }
+
+    public function show(SalaryComponent $salaryComponent)
+    {
+        // Redirect to edit view since there is no dedicated show page
+        return redirect()->route('finance.salary-components.edit', $salaryComponent);
     }
 
     public function edit(SalaryComponent $salaryComponent)
@@ -63,7 +75,13 @@ class SalaryComponentController extends Controller
             'amount' => 'required|numeric|min:0',
         ]);
 
-        $salaryComponent->update($validated);
+        try {
+            $salaryComponent->update($validated);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui komponen gaji: ' . $e->getMessage());
+        }
 
         return redirect()->route('finance.salary-components.index')
             ->with('success', 'Komponen gaji berhasil diperbarui.');
@@ -71,7 +89,12 @@ class SalaryComponentController extends Controller
 
     public function destroy(SalaryComponent $salaryComponent)
     {
-        $salaryComponent->delete();
+        try {
+            $salaryComponent->delete();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus komponen gaji: ' . $e->getMessage());
+        }
 
         return redirect()->route('finance.salary-components.index')
             ->with('success', 'Komponen gaji berhasil dihapus.');

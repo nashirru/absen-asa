@@ -22,3 +22,16 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Build artifacts & large files
+composer.phar
+composer-setup.php
+*.zip
+*.sql
+cookies.txt
+data.sql
+migrasi*.sql
+perbaiki_*.sql
+update_*.sql
+warok*.sql
+u111743367_*.sql

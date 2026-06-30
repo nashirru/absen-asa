@@ -6,35 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * This migration is now consolidated into 2026_06_28_181000_fix_karyawan_merge.php.
+     * It remains here as a safety no-op so existing runs are not disrupted.
+     */
     public function up(): void
     {
-        if (!Schema::hasColumn('salary_components', 'karyawan_id')) {
-            Schema::table('salary_components', function (Blueprint $table) {
-                $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->cascadeOnDelete()->after('id');
-            });
-        }
-
-        if (!Schema::hasColumn('payroll_details', 'karyawan_id')) {
-            Schema::table('payroll_details', function (Blueprint $table) {
-                $table->foreignId('karyawan_id')->nullable()->constrained('karyawan')->cascadeOnDelete()->after('id');
-            });
-        }
+        // Handled by 2026_06_28_181000_fix_karyawan_merge.php
     }
 
     public function down(): void
     {
-        Schema::table('salary_components', function (Blueprint $table) {
-            if (Schema::hasColumn('salary_components', 'karyawan_id')) {
-                $table->dropForeign(['karyawan_id']);
-                $table->dropColumn('karyawan_id');
-            }
-        });
-
-        Schema::table('payroll_details', function (Blueprint $table) {
-            if (Schema::hasColumn('payroll_details', 'karyawan_id')) {
-                $table->dropForeign(['karyawan_id']);
-                $table->dropColumn('karyawan_id');
-            }
-        });
+        // Handled by 2026_06_28_181000_fix_karyawan_merge.php
     }
 };
