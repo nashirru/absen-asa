@@ -13,11 +13,17 @@
             </div>
             <div>
                 <label class="text-xs font-semibold text-admin-slate">Tipe</label>
-                <select name="type" required
+                <select name="type" id="categoryType" required onchange="updateSubCategoriesLabel()"
                         class="w-full mt-1 px-4 py-2.5 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
                     <option value="income" {{ old('type', $category->type) == 'income' ? 'selected' : '' }}>Pemasukan</option>
                     <option value="expense" {{ old('type', $category->type) == 'expense' ? 'selected' : '' }}>Pengeluaran</option>
                 </select>
+            </div>
+            <div>
+                <label id="subCategoriesLabel" class="text-xs font-semibold text-admin-slate">Jenis Pemasukan (Satu per baris)</label>
+                <textarea name="sub_categories" id="subCategoriesInput" rows="4" placeholder="Contoh:&#10;SPP Reguler&#10;SPP Intensif"
+                          class="w-full mt-1 px-4 py-2.5 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">{{ old('sub_categories', is_array($category->sub_categories) ? implode("\n", $category->sub_categories) : '') }}</textarea>
+                <p id="subCategoriesHint" class="text-[10px] text-admin-slate mt-1">Masukkan rincian jenis pemasukan. Kosongkan jika tidak ada rincian khusus.</p>
             </div>
             <div>
                 <label class="text-xs font-semibold text-admin-slate">Warna</label>
@@ -32,3 +38,28 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function updateSubCategoriesLabel() {
+    const type = document.getElementById('categoryType').value;
+    const label = document.getElementById('subCategoriesLabel');
+    const hint = document.getElementById('subCategoriesHint');
+    const input = document.getElementById('subCategoriesInput');
+    
+    if (type === 'expense') {
+        label.innerText = 'Jenis Pengeluaran (Satu per baris)';
+        hint.innerText = 'Masukkan rincian jenis pengeluaran. Kosongkan jika tidak ada rincian khusus.';
+        input.placeholder = 'Contoh:\nModul pelatihan\nAlat Tulis kantor';
+    } else {
+        label.innerText = 'Jenis Pemasukan (Satu per baris)';
+        hint.innerText = 'Masukkan rincian jenis pemasukan. Kosongkan jika tidak ada rincian khusus.';
+        input.placeholder = 'Contoh:\nSPP Reguler\nSPP Intensif';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateSubCategoriesLabel();
+});
+</script>
+@endpush

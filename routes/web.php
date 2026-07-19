@@ -47,8 +47,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('finance/accounts', AccountController::class)->names('finance.accounts');
         Route::resource('finance/categories', CategoryController::class)->names('finance.categories');
         Route::resource('finance/salary-components', SalaryComponentController::class)->names('finance.salary-components');
-        Route::resource('finance/transactions', TransactionController::class)->names('finance.transactions');
         Route::get('finance/transactions/categories-by-type', [TransactionController::class, 'getCategoriesByType'])->name('finance.transactions.categories-by-type');
+        Route::resource('finance/transactions', TransactionController::class)->names('finance.transactions');
         Route::resource('finance/fund-transfers', FundTransferController::class)->names('finance.fund-transfers');
         Route::resource('finance/payroll-periods', PayrollPeriodController::class)->names('finance.payroll-periods');
         Route::post('finance/payroll-periods/{payrollPeriod}/process', [PayrollPeriodController::class, 'process'])->name('finance.payroll-periods.process');
@@ -132,11 +132,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/absensi/{absensi}/approve', [AbsensiController::class, 'approve'])->name('absensi.approve');
         Route::post('/absensi/{absensi}/reject', [AbsensiController::class, 'reject'])->name('absensi.reject');
 
-        // Sandbox: hapus absensi (hanya dev/local)
-        if (app()->environment('local', 'development')) {
-            Route::delete('/absensi/{absensi}', [AbsensiController::class, 'adminDestroy'])->name('absensi.destroy');
-            Route::delete('/absensi/{absensi}/restore', [AbsensiController::class, 'adminRestore'])->name('absensi.restore');
-        }
+        // Hapus data absensi (soft delete)
+        Route::delete('/absensi/{absensi}', [AbsensiController::class, 'adminDestroy'])->name('absensi.destroy');
 
         // Reports
         Route::get('/report', [ReportController::class, 'index'])->name('report.index');

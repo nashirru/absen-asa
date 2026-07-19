@@ -36,7 +36,18 @@
                         <td class="px-5 py-3.5">
                             <span class="inline-block w-5 h-5 rounded-admin-full border border-admin-border" style="background-color: {{ $category->color }}"></span>
                         </td>
-                        <td class="px-5 py-3.5 text-admin-ink font-medium">{{ $category->name }}</td>
+                        <td class="px-5 py-3.5 text-admin-ink font-medium">
+                            <div>{{ $category->name }}</div>
+                            @if($category->sub_categories && count($category->sub_categories) > 0)
+                                <div class="mt-1 flex flex-wrap gap-1.5">
+                                    @foreach($category->sub_categories as $sub)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-admin-full text-[10px] font-semibold bg-admin-indigo-tint text-admin-indigo">
+                                            {{ $sub }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </td>
                         <td class="px-5 py-3.5">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-admin-full text-xs font-medium {{ $category->type == 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                 {{ $category->type == 'income' ? 'Pemasukan' : 'Pengeluaran' }}
@@ -44,10 +55,12 @@
                         </td>
                         <td class="px-5 py-3.5 text-center">
                             <a href="{{ route('finance.categories.edit', $category) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium mr-2">Edit</a>
-                            <form method="POST" action="{{ route('finance.categories.destroy', $category) }}" class="inline" onsubmit="return confirm('Hapus kategori ini?')">
+                            @if(auth()->user()->isSuperAdmin())
+                            <form method="POST" action="{{ route('finance.categories.destroy', $category) }}" class="inline" onsubmit="confirmDelete(event, 'Kategori ini akan dihapus permanen.')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium">Hapus</button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

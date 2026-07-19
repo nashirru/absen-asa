@@ -13,6 +13,7 @@ class FundTransfer extends Model
         "amount",
         "date",
         "note",
+        "attachment",
     ];
 
     protected function casts(): array

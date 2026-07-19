@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\FundTransfer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FundTransferController extends Controller
 {
@@ -49,6 +50,7 @@ class FundTransferController extends Controller
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date',
             'note' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         // Check balance
@@ -56,6 +58,10 @@ class FundTransferController extends Controller
         if ($fromAccount->balance < $validated['amount']) {
             return back()->withInput()
                 ->with('error', 'Saldo akun asal tidak mencukupi. Saldo tersedia: Rp ' . number_format($fromAccount->balance, 0, ',', '.'));
+        }
+
+        if ($request->hasFile('attachment')) {
+            $validated['attachment'] = $request->file('attachment')->store('transfers', 'public');
         }
 
         FundTransfer::create($validated);
@@ -78,6 +84,7 @@ class FundTransferController extends Controller
             'amount' => 'required|numeric|min:1',
             'date' => 'required|date',
             'note' => 'nullable|string',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
         ]);
 
         // Check balance of new from_account (accounting for old amount being reverted)
@@ -97,6 +104,14 @@ class FundTransferController extends Controller
                 ->with('error', 'Saldo akun asal tidak mencukupi. Saldo tersedia: Rp ' . number_format($availableBalance, 0, ',', '.'));
         }
 
+        if ($request->hasFile('attachment')) {
+            // Delete old attachment
+            if ($fundTransfer->attachment) {
+                Storage::disk('public')->delete($fundTransfer->attachment);
+            }
+            $validated['attachment'] = $request->file('attachment')->store('transfers', 'public');
+        }
+
         $fundTransfer->update($validated);
 
         return redirect()->route('finance.fund-transfers.index')
@@ -105,6 +120,14 @@ class FundTransferController extends Controller
 
     public function destroy(FundTransfer $fundTransfer)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus transfer dana.');
+        }
+
+        if ($fundTransfer->attachment) {
+            Storage::disk('public')->delete($fundTransfer->attachment);
+        }
+
         $fundTransfer->delete();
 
         return redirect()->route('finance.fund-transfers.index')

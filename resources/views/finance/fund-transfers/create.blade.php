@@ -4,7 +4,7 @@
 @section('content')
 <div class="max-w-xl mx-auto animate-fade-in-up">
     <div class="bg-admin-surface border border-admin-border rounded-admin-lg p-6">
-        <form method="POST" action="{{ route('finance.fund-transfers.store') }}" class="space-y-5">
+        <form method="POST" action="{{ route('finance.fund-transfers.store') }}" enctype="multipart/form-data" class="space-y-5">
             @csrf
             <div>
                 <label class="text-xs font-semibold text-admin-slate">Dari Akun</label>
@@ -45,6 +45,13 @@
                 <label class="text-xs font-semibold text-admin-slate">Catatan</label>
                 <textarea name="note" rows="3"
                           class="w-full mt-1 px-4 py-2.5 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">{{ old('note') }}</textarea>
+            </div>
+            <div>
+                <label class="text-xs font-semibold text-admin-slate">Lampiran <span class="text-admin-mist font-normal">(opsional)</span></label>
+                <input type="file" name="attachment" accept=".pdf,.jpg,.jpeg,.png"
+                       class="w-full mt-1 px-4 py-2 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink file:mr-3 file:py-1 file:px-3 file:rounded-admin-md file:border-0 file:text-xs file:font-medium file:bg-admin-indigo file:text-white">
+                <p class="text-xs text-admin-mist mt-1">Maks 2MB. Format: PDF, JPG, PNG</p>
+                @error('attachment') <p class="text-xs text-admin-danger mt-1">{{ $message }}</p> @enderror
             </div>
             <div class="flex items-center gap-3 pt-2">
                 <button type="submit" class="bg-admin-indigo text-white px-6 py-2.5 rounded-admin-md text-sm font-medium hover:bg-admin-indigo-deep transition-colors">Simpan</button>

@@ -43,6 +43,7 @@
                         <th class="text-left px-5 py-3">Kategori</th>
                         <th class="text-right px-5 py-3">Jumlah</th>
                         <th class="text-left px-5 py-3">Keterangan</th>
+                        <th class="text-center px-5 py-3">Bukti Transaksi</th>
                         <th class="text-center px-5 py-3">Aksi</th>
                     </tr>
                 </thead>
@@ -56,23 +57,47 @@
                             </span>
                         </td>
                         <td class="px-5 py-3.5 text-admin-slate">{{ $t->account->name }}</td>
-                        <td class="px-5 py-3.5 text-admin-slate">{{ $t->category->name }}</td>
+                        <td class="px-5 py-3.5 text-admin-slate">
+                            <div>{{ $t->category->name ?? 'Tanpa Kategori' }}</div>
+                            @if($t->jenis_pengeluaran && count($t->jenis_pengeluaran) > 0)
+                                <div class="mt-1 flex flex-wrap gap-1">
+                                    @foreach($t->jenis_pengeluaran as $sub)
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-admin-indigo-tint text-[10px] font-semibold text-admin-indigo">
+                                            {{ $sub }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </td>
                         <td class="px-5 py-3.5 text-admin-ink text-right font-mono font-semibold">Rp {{ number_format($t->amount, 0, ',', '.') }}</td>
                         <td class="px-5 py-3.5 text-admin-mist max-w-[200px] truncate">{{ $t->description ?? '-' }}</td>
                         <td class="px-5 py-3.5 text-center">
+                            @if($t->attachment)
+                                <a href="{{ Storage::url($t->attachment) }}" target="_blank"
+                                   class="inline-flex items-center gap-1 px-2 py-1 rounded-admin-md text-xs font-medium bg-admin-indigo-tint text-admin-indigo hover:bg-admin-indigo/20 transition-colors">
+                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                                    Lihat
+                                </a>
+                            @else
+                                <span class="text-xs text-admin-mist">—</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-3.5 text-center">
                             @if(!$t->ref_payroll_id)
                                 <a href="{{ route('finance.transactions.edit', $t) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium mr-2">Edit</a>
-                                <form method="POST" action="{{ route('finance.transactions.destroy', $t) }}" class="inline" onsubmit="return confirm('Hapus transaksi ini?')">
+                                @if(auth()->user()->isSuperAdmin())
+                                <form method="POST" action="{{ route('finance.transactions.destroy', $t) }}" class="inline" onsubmit="confirmDelete(event, 'Transaksi ini akan dihapus permanen.')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium">Hapus</button>
                                 </form>
+                                @endif
                             @else
                                 <span class="text-admin-mist text-xs italic">Payroll</span>
                             @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="px-5 py-8 text-center text-admin-mist">Belum ada transaksi.</td></tr>
+                    <tr><td colspan="8" class="px-5 py-8 text-center text-admin-mist">Belum ada transaksi.</td></tr>
                     @endforelse
                 </tbody>
             </table>

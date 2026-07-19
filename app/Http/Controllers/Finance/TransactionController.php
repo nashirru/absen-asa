@@ -45,7 +45,7 @@ class TransactionController extends Controller
     public function create()
     {
         $accounts = Account::pluck('name', 'id');
-        $categories = Category::pluck('name', 'id');
+        $categories = Category::where('type', 'income')->pluck('name', 'id');
         return view('finance.transactions.create', compact('accounts', 'categories'));
     }
 
@@ -55,6 +55,8 @@ class TransactionController extends Controller
             'type' => 'required|in:income,expense',
             'account_id' => 'required|exists:accounts,id',
             'category_id' => 'required|exists:categories,id',
+            'jenis_pengeluaran' => 'nullable|array',
+            'jenis_pengeluaran.*' => 'string|max:255',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
             'description' => 'nullable|string',
@@ -81,7 +83,7 @@ class TransactionController extends Controller
         }
 
         $accounts = Account::pluck('name', 'id');
-        $categories = Category::pluck('name', 'id');
+        $categories = Category::where('type', $transaction->type)->pluck('name', 'id');
         return view('finance.transactions.edit', compact('transaction', 'accounts', 'categories'));
     }
 
@@ -96,6 +98,8 @@ class TransactionController extends Controller
             'type' => 'required|in:income,expense',
             'account_id' => 'required|exists:accounts,id',
             'category_id' => 'required|exists:categories,id',
+            'jenis_pengeluaran' => 'nullable|array',
+            'jenis_pengeluaran.*' => 'string|max:255',
             'amount' => 'required|numeric|min:0',
             'date' => 'required|date',
             'description' => 'nullable|string',
@@ -110,6 +114,11 @@ class TransactionController extends Controller
             $validated['attachment'] = $request->file('attachment')->store('transactions', 'public');
         }
 
+        // Handle case where all checkboxes are unchecked
+        if (!$request->has('jenis_pengeluaran')) {
+            $validated['jenis_pengeluaran'] = [];
+        }
+
         $transaction->update($validated);
 
         return redirect()->route('finance.transactions.index')
@@ -118,6 +127,10 @@ class TransactionController extends Controller
 
     public function destroy(Transaction $transaction)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus transaksi.');
+        }
+
         if ($transaction->ref_payroll_id) {
             return redirect()->route('finance.transactions.index')
                 ->with('error', 'Transaksi penggajian tidak dapat dihapus.');
@@ -135,7 +148,7 @@ class TransactionController extends Controller
 
     public function getCategoriesByType(Request $request)
     {
-        $categories = Category::where('type', $request->type)->pluck('name', 'id');
+        $categories = Category::where('type', $request->type)->get(['id', 'name', 'sub_categories']);
         return response()->json($categories);
     }
 }

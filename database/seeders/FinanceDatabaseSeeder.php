@@ -35,19 +35,48 @@ class FinanceDatabaseSeeder extends Seeder
         $this->command?->info('Membuat kategori transaksi...');
         $categories = [
             // Income
-            ['name' => 'SPP Siswa',              'type' => 'income',  'color' => '#22c55e'],
-            ['name' => 'Donasi',                 'type' => 'income',  'color' => '#16a34a'],
-            ['name' => 'Pendaftaran',             'type' => 'income',  'color' => '#15803d'],
-            ['name' => 'Bantuan Pemerintah',      'type' => 'income',  'color' => '#6366f1'],
-            ['name' => 'Lain-lain (Pemasukan)',   'type' => 'income',  'color' => '#8b5cf6'],
+            ['name' => 'SPP Siswa',              'type' => 'income',  'color' => '#22c55e', 'sub_categories' => []],
+            ['name' => 'Donasi',                 'type' => 'income',  'color' => '#16a34a', 'sub_categories' => []],
+            ['name' => 'Pendaftaran',             'type' => 'income',  'color' => '#15803d', 'sub_categories' => []],
+            ['name' => 'Bantuan Pemerintah',      'type' => 'income',  'color' => '#6366f1', 'sub_categories' => []],
+            ['name' => 'Lain-lain (Pemasukan)',   'type' => 'income',  'color' => '#8b5cf6', 'sub_categories' => []],
             // Expense
-            ['name' => 'Gaji Karyawan',          'type' => 'expense', 'color' => '#ef4444'],
-            ['name' => 'Listrik & Air',           'type' => 'expense', 'color' => '#dc2626'],
-            ['name' => 'ATK & Perlengkapan',      'type' => 'expense', 'color' => '#f59e0b'],
-            ['name' => 'Maintenance & Perbaikan', 'type' => 'expense', 'color' => '#d97706'],
-            ['name' => 'Transportasi',            'type' => 'expense', 'color' => '#ea580c'],
-            ['name' => 'Konsumsi',               'type' => 'expense', 'color' => '#e11d48'],
-            ['name' => 'Lain-lain (Pengeluaran)', 'type' => 'expense', 'color' => '#be123c'],
+            [
+                'name' => 'Biaya Operasional',
+                'type' => 'expense',
+                'color' => '#f59e0b',
+                'sub_categories' => ["Modul pelatihan", "Alat Tulis kantor", "Sertifikasi dan Ujian", "Perlengkapan peserta"]
+            ],
+            [
+                'name' => 'Biaya pemasaran / marketing',
+                'type' => 'expense',
+                'color' => '#ea580c',
+                'sub_categories' => ["Biaya iklan", "Komisi dan afiliasi", "Pengelolaan konten"]
+            ],
+            [
+                'name' => 'Biaya sarana dan prasarana',
+                'type' => 'expense',
+                'color' => '#dc2626',
+                'sub_categories' => ["Sewa gedung", "Tagihan utilitas", "Kebersihan dan keamanan", "Pemeliharaan sarana & prasarana"]
+            ],
+            [
+                'name' => 'Biaya administrasi dan umum',
+                'type' => 'expense',
+                'color' => '#ef4444',
+                'sub_categories' => ["Gaji karyawan", "Legalitas dan perizinan", "Perangkat lunak dan sistem", "Pajak"]
+            ],
+            [
+                'name' => 'Biaya pengembangan',
+                'type' => 'expense',
+                'color' => '#38bdf8',
+                'sub_categories' => ["Kunjungan kerjasama", "Pelatihan intruktur", "Matching job"]
+            ],
+            [
+                'name' => 'Lain-lain (Pengeluaran)',
+                'type' => 'expense',
+                'color' => '#be123c',
+                'sub_categories' => []
+            ],
         ];
         foreach ($categories as $cat) {
             Category::create($cat);
@@ -125,7 +154,8 @@ class FinanceDatabaseSeeder extends Seeder
             $transactions[] = [
                 'type'        => 'expense',
                 'account_id'  => $kasId,
-                'category_id' => $expenseCategories->where('name', 'Listrik & Air')->first()->id,
+                'category_id' => $expenseCategories->where('name', 'Biaya sarana dan prasarana')->first()->id,
+                'jenis_pengeluaran' => ['Tagihan utilitas'],
                 'amount'      => 1_200_000,
                 'description' => 'Tagihan listrik & air',
                 'date'        => $date->copy()->day(10),
@@ -133,7 +163,8 @@ class FinanceDatabaseSeeder extends Seeder
             $transactions[] = [
                 'type'        => 'expense',
                 'account_id'  => $kasId,
-                'category_id' => $expenseCategories->where('name', 'ATK & Perlengkapan')->first()->id,
+                'category_id' => $expenseCategories->where('name', 'Biaya Operasional')->first()->id,
+                'jenis_pengeluaran' => ['Alat Tulis kantor'],
                 'amount'      => rand(500_000, 1_000_000),
                 'description' => 'Belanja ATK dan perlengkapan kantor',
                 'date'        => $date->copy()->day(20),
@@ -141,7 +172,8 @@ class FinanceDatabaseSeeder extends Seeder
             $transactions[] = [
                 'type'        => 'expense',
                 'account_id'  => $kasId,
-                'category_id' => $expenseCategories->where('name', 'Konsumsi')->first()->id,
+                'category_id' => $expenseCategories->where('name', 'Biaya Operasional')->first()->id,
+                'jenis_pengeluaran' => ['Perlengkapan peserta'],
                 'amount'      => 600_000,
                 'description' => 'Konsumsi rapat bulanan',
                 'date'        => $date->copy()->day(25),

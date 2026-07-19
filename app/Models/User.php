@@ -94,7 +94,7 @@ class User extends Authenticatable
 
     public function getFotoUrlAttribute(): string
     {
-        if ($this->foto && file_exists(public_path('uploads/foto/' . $this->foto))) {
+        if ($this->foto) {
             return asset('uploads/foto/' . $this->foto);
         }
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=2563EB&color=fff&size=200';

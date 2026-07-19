@@ -52,12 +52,14 @@
                                 <a href="{{ route('kelas.edit', $k) }}" class="p-2 rounded-admin-md border border-admin-border text-admin-indigo hover:bg-admin-indigo-tint hover:border-admin-indigo/20 transition-all duration-150" title="Edit">
                                     <i data-lucide="edit" class="w-4 h-4"></i>
                                 </a>
-                                <form action="{{ route('kelas.destroy', $k) }}" method="POST" onsubmit="return confirm('Yakin hapus kelas ini?')" class="inline">
+                                @if(auth()->user()->isSuperAdmin())
+                                <form action="{{ route('kelas.destroy', $k) }}" method="POST" class="inline" onsubmit="confirmDelete(event, 'Kelas ini akan dihapus permanen.')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="p-2 rounded-admin-md border border-admin-border text-admin-danger hover:bg-admin-danger-tint hover:border-admin-danger/20 transition-all duration-150" title="Hapus">
                                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </form>
+                                @endif
                             </div>
                         @endif
                     </div>

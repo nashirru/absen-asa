@@ -5,7 +5,7 @@
 <div class="max-w-2xl mx-auto animate-fade-in-up">
     <div class="bg-admin-surface border border-admin-border rounded-admin-lg p-6">
         <h2 class="text-lg font-semibold text-admin-ink mb-6">Pengaturan Sistem</h2>
-        <form action="{{ route('settings.update') }}" method="POST" class="space-y-6">
+        <form action="{{ route('settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf @method('PUT')
             
             <!-- Umum -->
@@ -114,6 +114,78 @@
                     <div id="locStatus" class="text-xs mt-2 hidden"></div>
                 </div>
             </fieldset>
+
+            <!-- Tampilan Slip Gaji -->
+            <fieldset class="border border-admin-border rounded-admin-md p-4">
+                <legend class="text-xs font-bold uppercase tracking-wider text-admin-indigo px-2">Tampilan Slip Gaji</legend>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <label class="text-xs font-semibold text-admin-slate">Logo Perusahaan (Upload Gambar)</label>
+                        <input type="file" name="slip_logo" accept="image/*"
+                               class="w-full mt-1 px-4 py-2 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                        @error('slip_logo') <p class="text-xs text-red-500 font-medium mt-1">{{ $message }}</p> @enderror
+                        @if($settings['slip_logo'])
+                            <div class="mt-3 p-2 border border-admin-border rounded-admin-md bg-white flex items-center gap-3">
+                                <img src="{{ asset('uploads/logo/' . $settings['slip_logo']) }}" class="h-12 object-contain" alt="Logo Perusahaan">
+                                <span class="text-xs text-admin-slate">Logo saat ini</span>
+                            </div>
+                        @else
+                            <p class="text-[10px] text-admin-mist mt-1 leading-snug">Menggunakan nama aplikasi sebagai logo teks default.</p>
+                        @endif
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-admin-slate">Sub-judul Slip Gaji</label>
+                        <input type="text" name="slip_subtitle" value="{{ old('slip_subtitle', $settings['slip_subtitle']) }}" required
+                               class="w-full mt-1 px-4 py-2.5 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                        @error('slip_subtitle') <p class="text-xs text-red-500 font-medium mt-1">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Tanda Tangan Digital -->
+            <fieldset class="border border-admin-border rounded-admin-md p-4">
+                <legend class="text-xs font-bold uppercase tracking-wider text-admin-indigo px-2">Tanda Tangan Slip Gaji</legend>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2">
+                    <!-- Column 1: Nama Penandatangan -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-admin-slate">Nama Penandatangan (Disetujui Oleh)</label>
+                        <input type="text" name="ttd_nama" value="{{ old('ttd_nama', $settings['ttd_nama']) }}" required
+                               class="w-full mt-1 px-4 py-2.5 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                        @error('ttd_nama') <p class="text-xs text-red-500 font-medium mt-1">{{ $message }}</p> @enderror
+                    </div>
+                    
+                    <!-- Column 2: Upload File TTD -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-admin-slate">File TTD Digital (Gambar PNG/JPG)</label>
+                        <input type="file" name="ttd_digital" id="ttd_digital_file" accept="image/*"
+                               class="w-full mt-1 px-4 py-2 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink focus:outline-none focus:ring-2 focus:ring-admin-indigo/25">
+                        @error('ttd_digital') <p class="text-xs text-red-500 font-medium mt-1">{{ $message }}</p> @enderror
+                        @if($settings['ttd_digital'])
+                            <div class="mt-3 p-2 border border-admin-border rounded-admin-md bg-white flex items-center gap-3">
+                                <img src="{{ asset('uploads/ttd/' . $settings['ttd_digital']) }}" class="h-12 object-contain" alt="TTD Digital">
+                                <span class="text-xs text-admin-slate">Tanda tangan saat ini</span>
+                            </div>
+                        @else
+                            <p class="text-[10px] text-admin-mist mt-1 leading-snug">Belum ada tanda tangan digital yang diunggah.</p>
+                        @endif
+                    </div>
+
+                    <!-- Column 3: Drawing Pad -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-admin-slate">Atau Gambar TTD Langsung (Drawing Pad)</label>
+                        <div class="mt-1 relative">
+                            <canvas id="signature-pad" class="w-full border border-dashed border-admin-border rounded-admin-md bg-white cursor-crosshair" style="height: 120px; touch-action: none;"></canvas>
+                            <input type="hidden" name="ttd_image_base64" id="ttd_image_base64">
+                            <div class="flex justify-between items-center mt-2">
+                                <button type="button" id="clear-signature" class="px-2 py-1 bg-red-50 text-red-600 border border-red-200 rounded-admin-md text-[10px] font-semibold hover:bg-red-100 transition-colors">
+                                    Hapus Gambar (Clear)
+                                </button>
+                                <span class="text-[9px] text-admin-slate">Gambar dgn mouse/sentuh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
             
             <button type="submit" class="w-full py-3 bg-admin-indigo text-white rounded-admin-md font-semibold hover:bg-admin-indigo-deep transition-colors">
                 Simpan Pengaturan
@@ -176,6 +248,105 @@ function getBrowserLocation() {
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('signature-pad');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let isCanvasDrawn = false;
+
+        // Set internal resolution to match displayed size
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+
+        // Reset width and height on window resize to ensure drawing is accurate
+        window.addEventListener('resize', () => {
+            const tempImg = new Image();
+            tempImg.src = canvas.toDataURL();
+            tempImg.onload = () => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.drawImage(tempImg, 0, 0, canvas.width, canvas.height);
+            };
+        });
+
+        // Adjust line style
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        function getMousePos(canvasDom, touchOrMouseEvent) {
+            const rect = canvasDom.getBoundingClientRect();
+            const clientX = touchOrMouseEvent.touches ? touchOrMouseEvent.touches[0].clientX : touchOrMouseEvent.clientX;
+            const clientY = touchOrMouseEvent.touches ? touchOrMouseEvent.touches[0].clientY : touchOrMouseEvent.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            drawing = true;
+            isCanvasDrawn = true;
+            document.getElementById('ttd_digital_file').value = ''; // clear file upload
+            const pos = getMousePos(canvas, e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!drawing) return;
+            const pos = getMousePos(canvas, e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            e.preventDefault();
+        }
+
+        function stopDrawing() {
+            drawing = false;
+        }
+
+        // Mouse Events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        // Touch Events for Mobile/Tablet
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Clear Signature
+        document.getElementById('clear-signature').addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            isCanvasDrawn = false;
+            document.getElementById('ttd_image_base64').value = '';
+        });
+
+        // Clear canvas if file input changes
+        document.getElementById('ttd_digital_file').addEventListener('change', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            isCanvasDrawn = false;
+            document.getElementById('ttd_image_base64').value = '';
+        });
+
+        // Form Submission
+        const form = canvas.closest('form');
+        form.addEventListener('submit', (e) => {
+            if (isCanvasDrawn) {
+                document.getElementById('ttd_image_base64').value = canvas.toDataURL('image/png');
+            }
+        });
+    }
+});
 </script>
 @endpush
 @endsection

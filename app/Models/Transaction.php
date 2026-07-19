@@ -11,6 +11,7 @@ class Transaction extends Model
         "type",
         "account_id",
         "category_id",
+        "jenis_pengeluaran",
         "amount",
         "description",
         "date",
@@ -23,6 +24,7 @@ class Transaction extends Model
         return [
             "amount" => "decimal:2",
             "date" => "date",
+            "jenis_pengeluaran" => "array",
         ];
     }
 

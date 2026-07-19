@@ -48,7 +48,13 @@
                                         @foreach($location->shifts as $shift)
                                             <div class="text-[11px] font-semibold text-admin-ink">
                                                 {{ $shift->nama_shift }}: 
-                                                <span class="font-mono text-admin-slate font-normal">{{ \Carbon\Carbon::parse($shift->jam_masuk)->format('H:i') }} - {{ \Carbon\Carbon::parse($shift->jam_keluar)->format('H:i') }}</span>
+                                                <span class="font-mono text-admin-slate font-normal">
+                                                    @if($shift->is_24_hours)
+                                                        {{ \Carbon\Carbon::parse($shift->jam_masuk)->format('H:i') }} (24 Jam)
+                                                    @else
+                                                        {{ \Carbon\Carbon::parse($shift->jam_masuk)->format('H:i') }} - {{ \Carbon\Carbon::parse($shift->jam_keluar)->format('H:i') }}
+                                                    @endif
+                                                </span>
                                             </div>
                                         @endforeach
                                     </div>
@@ -81,13 +87,15 @@
                                     <a href="{{ route('locations.edit', $location) }}" class="p-2 rounded-admin-md hover:bg-admin-canvas transition-colors">
                                         <i data-lucide="edit" class="w-4 h-4 text-admin-slate"></i>
                                     </a>
+                                    @if(auth()->user()->isSuperAdmin())
                                     <form action="{{ route('locations.destroy', $location) }}" method="POST" class="inline"
-                                          onsubmit="return confirm('Yakin ingin menghapus lokasi ini?')">
+                                          onsubmit="confirmDelete(event, 'Lokasi ini akan dihapus permanen.')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="p-2 rounded-admin-md hover:bg-admin-danger-tint transition-colors">
                                             <i data-lucide="trash-2" class="w-4 h-4 text-admin-danger"></i>
                                         </button>
                                     </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

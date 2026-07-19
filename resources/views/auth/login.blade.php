@@ -43,17 +43,27 @@
                 </div>
 
                 <!-- Password -->
-                <div class="space-y-1.5">
+                <div class="space-y-1.5" x-data="{ show: false }">
                     <label for="password" class="text-sm font-medium text-member-ink">Password</label>
-                    <input
-                        id="password"
-                        type="password"
-                        name="password"
-                        required
-                        autocomplete="current-password"
-                        placeholder="••••••••"
-                        class="w-full h-10 px-3 text-sm rounded-lg border border-member-border bg-transparent text-member-ink placeholder:text-member-mist outline-none transition-all duration-150 focus:border-member-blue focus:ring-2 focus:ring-member-blue/20"
-                    >
+                    <div class="relative">
+                        <input
+                            id="password"
+                            :type="show ? 'text' : 'password'"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            placeholder="••••••••"
+                            class="w-full h-10 pl-3 pr-10 text-sm rounded-lg border border-member-border bg-transparent text-member-ink placeholder:text-member-mist outline-none transition-all duration-150 focus:border-member-blue focus:ring-2 focus:ring-member-blue/20"
+                        >
+                        <button
+                            type="button"
+                            @click="show = !show"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-member-slate hover:text-member-ink transition-colors"
+                        >
+                            <i x-show="!show" data-lucide="eye" class="w-4 h-4"></i>
+                            <i x-show="show" data-lucide="eye-off" class="w-4 h-4" x-cloak></i>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Remember Me -->

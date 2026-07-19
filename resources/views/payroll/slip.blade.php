@@ -227,10 +227,19 @@
 
     <div class="slip-container">
         <!-- Header -->
+        @php
+            $slipLogo = \App\Models\Setting::get('slip_logo');
+            $slipSubtitle = \App\Models\Setting::get('slip_subtitle', 'Sistem Penggajian & Arus Kas Digital');
+            $appName = \App\Models\Setting::get('app_name', config('app.name', 'MeBoX'));
+        @endphp
         <div class="slip-header">
             <div class="company-info">
-                <h1>{{ config('app.name', 'Cashflow') }}</h1>
-                <p>Sistem Penggajian & Arus Kas Digital</p>
+                @if($slipLogo && file_exists(public_path('uploads/logo/' . $slipLogo)))
+                    <img src="{{ asset('uploads/logo/' . $slipLogo) }}" style="max-height: 50px; max-width: 220px; object-fit: contain; margin-bottom: 6px;" alt="Logo Perusahaan">
+                @else
+                    <h1>{{ $appName }}</h1>
+                @endif
+                <p>{{ $slipSubtitle }}</p>
             </div>
             <div class="slip-title">
                 <h2>Slip Gaji Karyawan</h2>
@@ -320,12 +329,22 @@
         <!-- Signatures -->
         <div class="signatures">
             <div>
-                <div class="signature-title">Diterima Oleh,</div>
+                <div class="signature-title" style="margin-bottom: 10px;">Diterima Oleh,</div>
+                <div style="height: 60px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px;"></div>
                 <div class="signature-name">{{ $employeeName }}</div>
             </div>
             <div>
-                <div class="signature-title">Disetujui Oleh,</div>
-                <div class="signature-name">Manajemen Cashflow</div>
+                <div class="signature-title" style="margin-bottom: 10px;">Disetujui Oleh,</div>
+                @php
+                    $ttdDigital = \App\Models\Setting::get('ttd_digital');
+                    $ttdNama = \App\Models\Setting::get('ttd_nama', 'Manajemen LPK Asa');
+                @endphp
+                <div style="height: 60px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+                    @if($ttdDigital && file_exists(public_path('uploads/ttd/' . $ttdDigital)))
+                        <img src="{{ asset('uploads/ttd/' . $ttdDigital) }}" style="max-height: 60px; max-width: 150px; object-fit: contain;" alt="Tanda Tangan Digital">
+                    @endif
+                </div>
+                <div class="signature-name">{{ $ttdNama }}</div>
             </div>
         </div>
     </div>

@@ -29,7 +29,7 @@
                 </button>
             @endif
             @if($payrollPeriod->status == 'processed')
-                <form method="POST" action="{{ route('finance.payroll-periods.pay', $payrollPeriod) }}" onsubmit="return confirm('Bayarkan gaji periode ini ke seluruh karyawan?')">
+                <form method="POST" action="{{ route('finance.payroll-periods.pay', $payrollPeriod) }}" onsubmit="confirmDelete(event, 'Bayarkan gaji periode ini ke seluruh karyawan?')">
                     @csrf
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-admin-md text-sm font-medium hover:bg-blue-700 transition-colors">
                         Bayar Gaji
@@ -37,10 +37,12 @@
                 </form>
             @endif
             @if($payrollPeriod->status != 'paid')
-                <form method="POST" action="{{ route('finance.payroll-periods.destroy', $payrollPeriod) }}" onsubmit="return confirm('Hapus periode gaji ini?')">
+                @if(auth()->user()->isSuperAdmin())
+                <form method="POST" action="{{ route('finance.payroll-periods.destroy', $payrollPeriod) }}" onsubmit="confirmDelete(event, 'Periode gaji ini akan dihapus permanen.')">
                     @csrf @method('DELETE')
                     <button type="submit" class="text-admin-danger hover:text-red-700 text-sm font-medium px-4 py-2">Hapus</button>
                 </form>
+                @endif
             @endif
             <a href="{{ route('finance.payroll-periods.index') }}" class="text-admin-slate hover:text-admin-ink text-sm font-medium px-4 py-2">Kembali</a>
         </div>

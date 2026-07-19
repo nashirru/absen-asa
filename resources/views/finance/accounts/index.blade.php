@@ -43,10 +43,12 @@
                         <td class="px-5 py-3.5 text-admin-ink text-right font-mono font-semibold">Rp {{ number_format($account->balance, 0, ',', '.') }}</td>
                         <td class="px-5 py-3.5 text-center">
                             <a href="{{ route('finance.accounts.edit', $account) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium mr-2">Edit</a>
-                            <form method="POST" action="{{ route('finance.accounts.destroy', $account) }}" class="inline" onsubmit="return confirm('Hapus akun ini?')">
+                            @if(auth()->user()->isSuperAdmin())
+                            <form method="POST" action="{{ route('finance.accounts.destroy', $account) }}" class="inline" onsubmit="confirmDelete(event, 'Akun ini akan dihapus permanen.')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium">Hapus</button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

@@ -252,8 +252,20 @@
                         @forelse($data['expense'] as $item)
                             @php $subtotalOut += (float) $item->total; @endphp
                             <tr>
-                                <td class="font-bold">{{ $item->category?->name ?? 'Tanpa Kategori' }}</td>
-                                <td class="text-right text-rose font-bold">Rp {{ number_format($item->total, 0, ',', '.') }}</td>
+                                <td class="font-bold">
+                                    <div>{{ $item->category?->name ?? 'Tanpa Kategori' }}</div>
+                                    @if(isset($item->breakdown) && count($item->breakdown) > 0)
+                                        <div style="margin-left: 15px; font-weight: normal; font-size: 11px; color: #64748b; margin-top: 5px; border-left: 2px solid #cbd5e1; padding-left: 8px;">
+                                            @foreach($item->breakdown as $sub => $subTotal)
+                                                <div style="display: flex; justify-content: space-between; margin-bottom: 2px; width: 100%;">
+                                                    <span>{{ $sub }}</span>
+                                                    <span style="font-family: monospace; padding-left: 20px;">Rp {{ number_format($subTotal, 0, ',', '.') }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="text-right text-rose font-bold" style="vertical-align: top;">Rp {{ number_format($item->total, 0, ',', '.') }}</td>
                             </tr>
                         @empty
                             <tr>

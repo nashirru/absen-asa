@@ -37,6 +37,10 @@ class HolidayController extends Controller
 
     public function destroy(Holiday $holiday)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus hari libur.');
+        }
+
         $holiday->delete();
         return redirect()->route('holidays.index')->with('success', 'Hari libur berhasil dihapus.');
     }

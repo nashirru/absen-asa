@@ -11,7 +11,15 @@ class Category extends Model
         "name",
         "type",
         "color",
+        "sub_categories",
     ];
+
+    protected function casts(): array
+    {
+        return [
+            "sub_categories" => "array",
+        ];
+    }
 
     public function transactions(): HasMany
     {

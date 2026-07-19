@@ -31,13 +31,21 @@ class LocationController extends Controller
             
             'shift1_name' => 'nullable|string|max:255',
             'shift1_jam_masuk' => 'nullable|required_with:shift1_name',
-            'shift1_jam_keluar' => 'nullable|required_with:shift1_name',
+            'shift1_jam_keluar' => 'exclude_if:shift1_is_24_hours,1|nullable|required_with:shift1_name',
             'shift1_batas_terlambat' => 'nullable|required_with:shift1_name',
+            'shift1_is_24_hours' => 'nullable|boolean',
             
             'shift2_name' => 'nullable|string|max:255',
             'shift2_jam_masuk' => 'nullable|required_with:shift2_name',
-            'shift2_jam_keluar' => 'nullable|required_with:shift2_name',
+            'shift2_jam_keluar' => 'exclude_if:shift2_is_24_hours,1|nullable|required_with:shift2_name',
             'shift2_batas_terlambat' => 'nullable|required_with:shift2_name',
+            'shift2_is_24_hours' => 'nullable|boolean',
+            
+            'shift3_name' => 'nullable|string|max:255',
+            'shift3_jam_masuk' => 'nullable|required_with:shift3_name',
+            'shift3_jam_keluar' => 'exclude_if:shift3_is_24_hours,1|nullable|required_with:shift3_name',
+            'shift3_batas_terlambat' => 'nullable|required_with:shift3_name',
+            'shift3_is_24_hours' => 'nullable|boolean',
         ]);
 
         $location = Location::create([
@@ -55,6 +63,7 @@ class LocationController extends Controller
                 'jam_masuk' => $request->shift1_jam_masuk,
                 'jam_keluar' => $request->shift1_jam_keluar,
                 'batas_terlambat' => $request->shift1_batas_terlambat,
+                'is_24_hours' => $request->boolean('shift1_is_24_hours'),
             ]);
         }
 
@@ -64,6 +73,17 @@ class LocationController extends Controller
                 'jam_masuk' => $request->shift2_jam_masuk,
                 'jam_keluar' => $request->shift2_jam_keluar,
                 'batas_terlambat' => $request->shift2_batas_terlambat,
+                'is_24_hours' => $request->boolean('shift2_is_24_hours'),
+            ]);
+        }
+
+        if ($request->filled('shift3_name')) {
+            $location->shifts()->create([
+                'nama_shift' => $request->shift3_name,
+                'jam_masuk' => $request->shift3_jam_masuk,
+                'jam_keluar' => $request->shift3_jam_keluar,
+                'batas_terlambat' => $request->shift3_batas_terlambat,
+                'is_24_hours' => $request->boolean('shift3_is_24_hours'),
             ]);
         }
 
@@ -90,13 +110,21 @@ class LocationController extends Controller
             
             'shift1_name' => 'nullable|string|max:255',
             'shift1_jam_masuk' => 'nullable|required_with:shift1_name',
-            'shift1_jam_keluar' => 'nullable|required_with:shift1_name',
+            'shift1_jam_keluar' => 'exclude_if:shift1_is_24_hours,1|nullable|required_with:shift1_name',
             'shift1_batas_terlambat' => 'nullable|required_with:shift1_name',
+            'shift1_is_24_hours' => 'nullable|boolean',
             
             'shift2_name' => 'nullable|string|max:255',
             'shift2_jam_masuk' => 'nullable|required_with:shift2_name',
-            'shift2_jam_keluar' => 'nullable|required_with:shift2_name',
+            'shift2_jam_keluar' => 'exclude_if:shift2_is_24_hours,1|nullable|required_with:shift2_name',
             'shift2_batas_terlambat' => 'nullable|required_with:shift2_name',
+            'shift2_is_24_hours' => 'nullable|boolean',
+            
+            'shift3_name' => 'nullable|string|max:255',
+            'shift3_jam_masuk' => 'nullable|required_with:shift3_name',
+            'shift3_jam_keluar' => 'exclude_if:shift3_is_24_hours,1|nullable|required_with:shift3_name',
+            'shift3_batas_terlambat' => 'nullable|required_with:shift3_name',
+            'shift3_is_24_hours' => 'nullable|boolean',
         ]);
 
         $location->update([
@@ -109,7 +137,7 @@ class LocationController extends Controller
         ]);
 
         // Only replace shifts if new shift data was provided (prevents data loss on partial updates)
-        if ($request->filled('shift1_name') || $request->filled('shift2_name')) {
+        if ($request->filled('shift1_name') || $request->filled('shift2_name') || $request->filled('shift3_name')) {
             $location->shifts()->delete();
         }
 
@@ -119,6 +147,7 @@ class LocationController extends Controller
                 'jam_masuk' => $request->shift1_jam_masuk,
                 'jam_keluar' => $request->shift1_jam_keluar,
                 'batas_terlambat' => $request->shift1_batas_terlambat,
+                'is_24_hours' => $request->boolean('shift1_is_24_hours'),
             ]);
         }
 
@@ -128,6 +157,17 @@ class LocationController extends Controller
                 'jam_masuk' => $request->shift2_jam_masuk,
                 'jam_keluar' => $request->shift2_jam_keluar,
                 'batas_terlambat' => $request->shift2_batas_terlambat,
+                'is_24_hours' => $request->boolean('shift2_is_24_hours'),
+            ]);
+        }
+
+        if ($request->filled('shift3_name')) {
+            $location->shifts()->create([
+                'nama_shift' => $request->shift3_name,
+                'jam_masuk' => $request->shift3_jam_masuk,
+                'jam_keluar' => $request->shift3_jam_keluar,
+                'batas_terlambat' => $request->shift3_batas_terlambat,
+                'is_24_hours' => $request->boolean('shift3_is_24_hours'),
             ]);
         }
 
@@ -137,6 +177,10 @@ class LocationController extends Controller
 
     public function destroy(Location $location)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus lokasi.');
+        }
+
         $location->delete();
         return redirect()->route('locations.index')
             ->with('success', 'Lokasi berhasil dihapus.');

@@ -106,9 +106,9 @@
                                         </form>
                                     @endif
 
-                                    @if(app()->environment('local', 'development'))
+                                    @if(auth()->user()->isSuperAdmin())
                                         <form action="{{ route('absensi.destroy', $a->id) }}" method="POST" class="inline"
-                                              onsubmit="return confirm('Hapus data absensi {{ $a->user->name }} tanggal {{ $a->tanggal->format('d/m/Y') }}?')">
+                                              onsubmit="confirmDelete(event, 'Hapus data absensi {{ $a->user->name }} tanggal {{ $a->tanggal->format('d/m/Y') }}?')">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="px-3 py-1.5 rounded-admin-md text-[11px] font-semibold bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-colors">
                                                 Hapus
@@ -120,7 +120,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ app()->environment('local', 'development') ? 7 : 6 }}" class="py-12 text-center text-admin-mist">
+                            <td colspan="7" class="py-12 text-center text-admin-mist">
                                 <i data-lucide="calendar" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
                                 <p class="text-sm">Belum ada data absensi</p>
                             </td>

@@ -72,6 +72,10 @@ class KelasController extends Controller
 
     public function destroy(Kelas $kelas)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus kelas.');
+        }
+
         $kelas->delete();
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus.');
     }

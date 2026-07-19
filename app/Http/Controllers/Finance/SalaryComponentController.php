@@ -89,6 +89,10 @@ class SalaryComponentController extends Controller
 
     public function destroy(SalaryComponent $salaryComponent)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus komponen gaji.');
+        }
+
         try {
             $salaryComponent->delete();
         } catch (\Exception $e) {

@@ -141,6 +141,10 @@ class SiswaController extends Controller
 
     public function destroy(Siswa $siswa)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus siswa.');
+        }
+
         $user = $siswa->user;
         if ($user->foto && file_exists(public_path('uploads/foto/' . $user->foto))) {
             unlink(public_path('uploads/foto/' . $user->foto));

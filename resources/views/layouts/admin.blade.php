@@ -8,11 +8,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     @stack('styles')
 </head>
-<body class="bg-admin-canvas font-admin text-admin-ink min-h-screen antialiased flex" x-data="{ sidebarOpen: true, toastShow: false, toastMessage: '', toastType: 'info' }" x-init="initToast()">
+<body class="bg-admin-canvas font-admin text-admin-ink min-h-screen antialiased flex" x-data="{ sidebarOpen: true }">
 
     <!-- Sidebar - normal flow, full height ikut konten -->
     <aside class="bg-admin-surface border-r border-admin-border flex flex-col transition-all duration-300 z-30 shrink-0"
@@ -292,35 +293,38 @@
         </main>
     </div>
 
-    <!-- Toast Notification (Floating Modal Layer - Has Shadow) -->
-    <div x-show="toastShow" x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed top-6 right-6 z-50 max-w-sm w-full bg-admin-surface border border-admin-border rounded-admin-md p-4 shadow-admin-float flex items-start gap-3">
-        
-        <div class="p-1 rounded-admin-full"
-             :class="toastType === 'success' ? 'bg-admin-success/10 text-admin-success' : toastType === 'error' ? 'bg-admin-danger/10 text-admin-danger' : 'bg-admin-indigo/10 text-admin-indigo'">
-            <i :data-lucide="toastType === 'success' ? 'check-circle' : toastType === 'error' ? 'alert-triangle' : 'info'" class="w-5 h-5"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-admin-ink" x-text="toastType.toUpperCase()"></p>
-            <p class="text-xs text-admin-slate mt-0.5" x-text="toastMessage"></p>
-        </div>
-        <button @click="toastShow = false" class="text-admin-mist hover:text-admin-slate transition-colors">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-    </div>
-
-    <!-- Session Flash Messages -->
+    <!-- Session Flash Messages (SweetAlert2) -->
     @if(session('success'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('success')), type: 'success' }) }, 100)"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: @json(session('success')),
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                });
+            });
+        </script>
     @endif
     @if(session('error'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('error')), type: 'error' }) }, 100)"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: @json(session('error')),
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                });
+            });
+        </script>
     @endif
 
     @stack('scripts')
@@ -330,20 +334,40 @@
             lucide.createIcons();
         });
 
-        function initToast() {
-            window.addEventListener('toast', (e) => {
-                const alpine = document.body.__x;
-                alpine.$data.toastMessage = e.detail.message;
-                alpine.$data.toastType = e.detail.type || 'info';
-                alpine.$data.toastShow = true;
-                setTimeout(() => {
-                    lucide.createIcons();
-                }, 10);
-                setTimeout(() => {
-                    alpine.$data.toastShow = false;
-                }, 4000);
+        // SweetAlert2 Confirm Delete helper
+        function confirmDelete(event, message = 'Data ini akan dihapus permanen.') {
+            event.preventDefault();
+            const form = event.target.closest('form');
+            Swal.fire({
+                title: 'Yakin hapus?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6F6C84',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
             });
         }
+
+        // Toast event listener for AJAX notifications using SweetAlert2
+        window.addEventListener('toast', (e) => {
+            Swal.fire({
+                icon: e.detail.type || 'success',
+                title: e.detail.type === 'success' ? 'Berhasil!' : 'Gagal!',
+                text: e.detail.message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+            });
+        });
 
         // Alpine.js component: AJAX Form Handler
         // Usage: <form x-data="ajaxForm({ action: '...', method: 'POST', callback: fn })" @submit.prevent="submit">

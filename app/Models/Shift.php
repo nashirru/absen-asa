@@ -12,7 +12,15 @@ class Shift extends Model
         'jam_masuk',
         'jam_keluar',
         'batas_terlambat',
+        'is_24_hours',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_24_hours' => 'boolean',
+        ];
+    }
 
     public function location()
     {

@@ -30,7 +30,7 @@ class KaryawanController extends Controller
 
     public function index(Request $request)
     {
-        $query = Karyawan::with('user');
+        $query = Karyawan::with('user', 'salaryComponents');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -103,8 +103,9 @@ class KaryawanController extends Controller
 
         // Re-render table for AJAX response
         if ($this->isAjax($request)) {
-            $query = Karyawan::with('user')->latest()->paginate(15);
-            $tableHtml = view('karyawan.partials.table', compact('karyawan'))->with('karyawan', $query)->render();
+            $karyawan = Karyawan::with('user', 'salaryComponents')->latest()->paginate(15);
+            $tableHtml = view('karyawan.partials.table', compact('karyawan'))->render();
+            session()->flash('success', 'Karyawan berhasil ditambahkan!');
             return response()->json([
                 'message' => 'Karyawan berhasil ditambahkan!',
                 'success' => true,
@@ -173,6 +174,7 @@ class KaryawanController extends Controller
         ]);
 
         if ($this->isAjax($request)) {
+            session()->flash('success', 'Karyawan berhasil diupdate!');
             return response()->json([
                 'message' => 'Karyawan berhasil diupdate!',
                 'success' => true,
@@ -184,6 +186,10 @@ class KaryawanController extends Controller
 
     public function destroy(Karyawan $karyawan)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus karyawan.');
+        }
+
         $user = $karyawan->user;
         if ($user->foto && file_exists(public_path('uploads/foto/' . $user->foto))) {
             unlink(public_path('uploads/foto/' . $user->foto));
@@ -212,6 +218,7 @@ class KaryawanController extends Controller
         ]);
 
         if ($this->isAjax($request)) {
+            session()->flash('success', 'Komponen gaji berhasil ditambahkan!');
             return response()->json([
                 'message' => 'Komponen gaji berhasil ditambahkan!',
                 'success' => true,
@@ -246,10 +253,15 @@ class KaryawanController extends Controller
      */
     public function destroySalaryComponent(Request $request, SalaryComponent $salaryComponent)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus komponen gaji.');
+        }
+
         $karyawan = $salaryComponent->karyawan;
         $salaryComponent->delete();
 
         if ($this->isAjax($request)) {
+            session()->flash('success', 'Komponen gaji berhasil dihapus!');
             return response()->json([
                 'message' => 'Komponen gaji berhasil dihapus!',
                 'success' => true,

@@ -86,11 +86,51 @@ class ReportPrintController extends Controller
                 ->get();
 
             $expenseQuery = clone $query;
-            $expense = $expenseQuery->where('type', 'expense')
-                ->select('category_id', DB::raw('SUM(amount) as total'))
-                ->groupBy('category_id')
+            $expenseTransactions = $expenseQuery->where('type', 'expense')
                 ->with('category')
                 ->get();
+
+            $expenseGroups = [];
+            foreach ($expenseTransactions as $tx) {
+                $catId = $tx->category_id ?? 0;
+                if (!isset($expenseGroups[$catId])) {
+                    $expenseGroups[$catId] = [
+                        'category_id' => $catId,
+                        'category' => $tx->category,
+                        'total' => 0,
+                        'breakdown' => [],
+                    ];
+                }
+                
+                $amount = (float) $tx->amount;
+                $expenseGroups[$catId]['total'] += $amount;
+                
+                $subItems = $tx->jenis_pengeluaran;
+                if (is_array($subItems) && count($subItems) > 0) {
+                    $splitAmount = $amount / count($subItems);
+                    foreach ($subItems as $sub) {
+                        if (!isset($expenseGroups[$catId]['breakdown'][$sub])) {
+                            $expenseGroups[$catId]['breakdown'][$sub] = 0;
+                        }
+                        $expenseGroups[$catId]['breakdown'][$sub] += $splitAmount;
+                    }
+                } else {
+                    $sub = 'Lain-lain / Belum Ditentukan';
+                    if (!isset($expenseGroups[$catId]['breakdown'][$sub])) {
+                        $expenseGroups[$catId]['breakdown'][$sub] = 0;
+                    }
+                    $expenseGroups[$catId]['breakdown'][$sub] += $amount;
+                }
+            }
+
+            $expense = collect($expenseGroups)->map(function ($group) {
+                return (object) [
+                    'category_id' => $group['category_id'],
+                    'category' => $group['category'],
+                    'total' => $group['total'],
+                    'breakdown' => $group['breakdown'],
+                ];
+            });
 
             $data = ['income' => $income, 'expense' => $expense];
         } else {

@@ -8,11 +8,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     @stack('styles')
 </head>
-<body class="bg-member-canvas font-member text-member-ink min-h-dvh flex justify-center antialiased" x-data="{ toastShow: false, toastMessage: '', toastType: 'info' }" x-init="initToast()">
+<body class="bg-member-canvas font-member text-member-ink min-h-dvh flex justify-center antialiased">
 
     <!-- Fixed Mobile Container (Max Width 480px, Centered) -->
     <div class="w-full max-w-[480px] min-h-dvh bg-member-canvas flex flex-col relative shadow-xl shadow-gray-200/50">
@@ -73,35 +74,38 @@
         @endauth
     </div>
 
-    <!-- Toast Notification (Floating Layer - Has Shadow) -->
-    <div x-show="toastShow" x-cloak
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed bottom-20 left-4 right-4 z-50 bg-member-surface rounded-member-xl p-4 shadow-member-card flex items-start gap-3 border border-member-border/20 max-w-[448px] mx-auto">
-        
-        <div class="p-1 rounded-member-full"
-             :class="toastType === 'success' ? 'bg-status-hadir/10 text-status-hadir' : toastType === 'error' ? 'bg-status-alpha/10 text-status-alpha' : 'bg-member-blue/10 text-member-blue'">
-            <i :data-lucide="toastType === 'success' ? 'check-circle' : toastType === 'error' ? 'alert-triangle' : 'info'" class="w-5 h-5"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-            <p class="text-xs font-bold text-member-ink" x-text="toastType.toUpperCase()"></p>
-            <p class="text-xs text-member-slate mt-0.5" x-text="toastMessage"></p>
-        </div>
-        <button @click="toastShow = false" class="text-member-mist hover:text-member-slate transition-colors">
-            <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-    </div>
-
-    <!-- Session Flash Messages -->
+    <!-- Session Flash Messages (SweetAlert2) -->
     @if(session('success'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('success')), type: 'success' }) }, 100)"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: @json(session('success')),
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                });
+            });
+        </script>
     @endif
     @if(session('error'))
-        <div x-data x-init="setTimeout(() => { $dispatch('toast', { message: @json(session('error')), type: 'error' }) }, 100)"></div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: @json(session('error')),
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                });
+            });
+        </script>
     @endif
 
     @stack('scripts')
@@ -110,21 +114,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
         });
-
-        function initToast() {
-            window.addEventListener('toast', (e) => {
-                const alpine = document.body.__x;
-                alpine.$data.toastMessage = e.detail.message;
-                alpine.$data.toastType = e.detail.type || 'info';
-                alpine.$data.toastShow = true;
-                setTimeout(() => {
-                    lucide.createIcons();
-                }, 10);
-                setTimeout(() => {
-                    alpine.$data.toastShow = false;
-                }, 4000);
-            });
-        }
     </script>
 </body>
 </html>

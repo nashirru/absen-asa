@@ -112,11 +112,13 @@
                             Rp {{ number_format($comp->amount, 0, ',', '.') }}
                         </td>
                         <td class="px-5 py-3 text-center">
+                            @if(auth()->user()->isSuperAdmin())
                             <form x-data="ajaxForm({ action: '{{ route('karyawan.salary-components.destroy', $comp) }}', callback: () => { window.location.reload(); } })"
-                                  @submit.prevent="if(confirm('Hapus komponen {{ $comp->name }}?')) submit()" method="POST" class="inline">
+                                  @submit.prevent="if(confirm('Hapus komponen {{ $comp->name }}?')) submit($event)" method="POST" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium cursor-pointer">Hapus</button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @endforeach

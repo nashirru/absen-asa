@@ -19,7 +19,7 @@
 
             <!-- Profile Photo -->
             <div class="relative">
-                <img :src="userFotoUrl" class="w-24 h-24 rounded-2xl object-cover border-2 border-emerald-100" alt="Foto Profil"
+                <img :src="userFotoUrl" class="w-32 h-32 rounded-2xl object-cover border-2 border-emerald-100 shadow-sm" alt="Foto Profil"
                      onerror="this.src='https://ui-avatars.com/api/?name=U&background=1A6DFF&color=fff&size=200'">
             </div>
 
@@ -36,7 +36,17 @@
                 <div class="h-px bg-slate-100"></div>
                 <div class="flex justify-between items-center">
                     <span class="text-xs text-slate-500">Status</span>
-                    <span class="s-badge s-badge-success" x-text="checkInStatus"></span>
+                    <span class="s-badge" :class="checkInStatus === 'Terlambat' ? 's-badge-warning' : 's-badge-success'" x-text="checkInStatus"></span>
+                </div>
+                <div class="h-px bg-slate-100"></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-500">Lokasi</span>
+                    <span class="text-sm font-semibold text-slate-900" x-text="selectedLocationName"></span>
+                </div>
+                <div class="h-px bg-slate-100"></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-500">Shift</span>
+                    <span class="text-sm font-semibold text-slate-900" x-text="selectedShiftName"></span>
                 </div>
             </div>
 
@@ -168,7 +178,7 @@
                     <select x-model="selectedShiftId" class="s-select">
                         <option value="">-- Pilih Shift --</option>
                         <template x-for="sh in activeShifts" :key="sh.id">
-                            <option :value="sh.id" x-text="sh.nama_shift + ' (' + sh.jam_masuk.substring(0, 5) + ' - ' + sh.jam_keluar.substring(0, 5) + ')'"></option>
+                            <option :value="sh.id" x-text="sh.nama_shift + ' (' + (sh.is_24_hours ? sh.jam_masuk.substring(0, 5) + ' (24 Jam)' : sh.jam_masuk.substring(0, 5) + ' - ' + sh.jam_keluar.substring(0, 5)) + ')'"></option>
                         </template>
                     </select>
                     <div x-show="activeShifts.length === 0" class="text-xs text-amber-600 bg-amber-50 rounded p-2 flex items-center gap-1.5 mt-1">
@@ -279,7 +289,7 @@ function checkInApp() {
         activeShifts: [],
         maxAccuracy: {{ $settings['max_accuracy'] }},
         map: null, markerUser: null, locationMarker: null, locationCircle: null,
-        checkInSuccess: false, userFotoUrl: '', checkInTime: '', checkInStatus: '',
+        checkInSuccess: false, userFotoUrl: '', checkInTime: '', checkInStatus: '', selectedLocationName: '', selectedShiftName: '',
 
         get canSubmit() {
             return this.gpsReady && this.selectedLocationId && this.selectedShiftId && this.distance !== null && this.distance <= this.locationRadius;
@@ -403,6 +413,11 @@ function checkInApp() {
                 });
                 const data = await response.json();
                 if (data.success) {
+                    const loc = this.locations.find(l => l.id == this.selectedLocationId);
+                    const sh = this.activeShifts.find(s => s.id == this.selectedShiftId);
+                    this.selectedLocationName = loc ? loc.name : '';
+                    this.selectedShiftName = sh ? sh.nama_shift : '';
+
                     this.userFotoUrl = data.data?.foto_url || '{{ asset("uploads/foto/" . auth()->user()->foto) }}';
                     this.checkInTime = data.data?.absensi?.jam_masuk || '{{ now()->format("H:i") }}';
                     this.checkInStatus = data.data?.absensi?.status === 'terlambat' ? 'Terlambat' : 'Hadir';

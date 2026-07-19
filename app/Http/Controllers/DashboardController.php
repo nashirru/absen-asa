@@ -306,7 +306,7 @@ class DashboardController extends Controller
                 ->selectRaw('
                     absensi.tanggal,
                     users.name as user_name,
-                    SUM(TIMESTAMPDIFF(MINUTE, absensi.jam_masuk, absensi.jam_keluar)) / 60.0 as hours
+                    SUM(TIMESTAMPDIFF(MINUTE, CONCAT(absensi.tanggal, " ", absensi.jam_masuk), CONCAT(COALESCE(absensi.tanggal_keluar, absensi.tanggal), " ", absensi.jam_keluar))) / 60.0 as hours
                 ')
                 ->groupBy('absensi.tanggal', 'absensi.user_id', 'users.name')
                 ->orderBy('absensi.tanggal')
@@ -341,7 +341,7 @@ class DashboardController extends Controller
         $records = (clone $query)
             ->selectRaw('
                 tanggal,
-                SUM(TIMESTAMPDIFF(MINUTE, jam_masuk, jam_keluar)) / 60.0 as total_hours,
+                SUM(TIMESTAMPDIFF(MINUTE, CONCAT(tanggal, " ", jam_masuk), CONCAT(COALESCE(tanggal_keluar, tanggal), " ", jam_keluar))) / 60.0 as total_hours,
                 COUNT(*) as record_count
             ')
             ->groupBy('tanggal')
@@ -579,7 +579,7 @@ class DashboardController extends Controller
                 users.name as user_name,
                 users.foto,
                 users.role,
-                SUM(TIMESTAMPDIFF(MINUTE, absensi.jam_masuk, absensi.jam_keluar)) / 60.0 as total_hours,
+                SUM(TIMESTAMPDIFF(MINUTE, CONCAT(absensi.tanggal, " ", absensi.jam_masuk), CONCAT(COALESCE(absensi.tanggal_keluar, absensi.tanggal), " ", absensi.jam_keluar))) / 60.0 as total_hours,
                 COUNT(*) as total_days
             ')
             ->groupBy('absensi.user_id', 'users.name', 'users.foto', 'users.role')

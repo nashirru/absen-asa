@@ -101,9 +101,13 @@ class ReportController extends Controller
                 $workMinutes = 0;
                 foreach ($userAbsensi as $abs) {
                     if ($abs->jam_masuk && $abs->jam_keluar) {
-                        $m = Carbon::parse($abs->jam_masuk);
-                        $kTime = Carbon::parse($abs->jam_keluar);
-                        $workMinutes += $m->diffInMinutes($kTime);
+                        $checkInDate = $abs->tanggal->toDateString();
+                        $checkOutDate = $abs->tanggal_keluar ? $abs->tanggal_keluar->toDateString() : $checkInDate;
+                        
+                        $start = Carbon::parse($checkInDate . ' ' . $abs->jam_masuk);
+                        $end = Carbon::parse($checkOutDate . ' ' . $abs->jam_keluar);
+                        
+                        $workMinutes += $start->diffInMinutes($end);
                     }
                 }
                 $workHours = round($workMinutes / 60, 2);

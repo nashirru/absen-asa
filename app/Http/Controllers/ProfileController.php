@@ -19,7 +19,7 @@ class ProfileController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
-            'foto' => 'nullable|string',
+            'foto' => 'nullable',
         ]);
 
         // Handle base64 selfie photo from check-in camera
@@ -58,11 +58,7 @@ class ProfileController extends Controller
             $user->update($updateData);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Profil berhasil diupdate.',
-            'foto_url' => $user->fresh()->foto_url,
-        ]);
+        return redirect()->route('profile.index')->with('success', 'Profil berhasil diupdate.');
     }
 
     public function changePassword(Request $request)

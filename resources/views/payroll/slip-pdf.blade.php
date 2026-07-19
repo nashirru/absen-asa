@@ -29,13 +29,22 @@
     </style>
 </head>
 <body>
+    @php
+        $slipLogo = \App\Models\Setting::get('slip_logo');
+        $slipSubtitle = \App\Models\Setting::get('slip_subtitle', 'Sistem Penggajian & Arus Kas Digital');
+        $appName = \App\Models\Setting::get('app_name', config('app.name', 'MeBoX'));
+    @endphp
     <div class="slip-container">
         <!-- Slip Header Table -->
         <table style="width: 100%; border-bottom: 2px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px; border-collapse: collapse;">
             <tr>
                 <td style="text-align: left; vertical-align: top;">
-                    <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a; font-family: 'Helvetica', 'Arial', sans-serif;">Cashflow</h1>
-                    <p style="margin: 3px 0 0 0; font-size: 11px; color: #64748b;">Perusahaan {{ config('app.name', 'Keuangan') }} &mdash; Slip Gaji Resmi</p>
+                    @if($slipLogo && file_exists(public_path('uploads/logo/' . $slipLogo)))
+                        <img src="{{ public_path('uploads/logo/' . $slipLogo) }}" style="max-height: 45px; max-width: 180px; vertical-align: middle; margin-bottom: 4px;" alt="Logo Perusahaan">
+                    @else
+                        <h1 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a; font-family: 'Helvetica', 'Arial', sans-serif;">{{ $appName }}</h1>
+                    @endif
+                    <p style="margin: 3px 0 0 0; font-size: 11px; color: #64748b;">{{ $slipSubtitle }}</p>
                 </td>
                 <td style="text-align: right; vertical-align: top;">
                     <h2 style="margin: 0; font-size: 16px; font-weight: 700; color: #4f46e5; text-transform: uppercase; letter-spacing: 1px;">Slip Gaji</h2>
@@ -134,21 +143,31 @@
 
         <!-- Signatures Table -->
         <table style="width: 100%; margin-top: 40px; border-collapse: collapse;">
+            @php
+                $ttdDigital = \App\Models\Setting::get('ttd_digital');
+                $ttdNama = \App\Models\Setting::get('ttd_nama', 'Manajemen LPK Asa');
+            @endphp
             <tr>
                 <td style="width: 50%; text-align: center; vertical-align: top;">
-                    <div style="color: #64748b; font-weight: 500; margin-bottom: 50px;">Diterima Oleh,</div>
+                    <div style="color: #64748b; font-weight: 500; margin-bottom: 5px;">Diterima Oleh,</div>
+                    <div style="height: 50px;"></div>
                     <div style="font-weight: 700; color: #0f172a; display: inline-block; border-top: 1px solid #cbd5e1; padding-top: 6px; width: 180px;">{{ $employeeName }}</div>
                 </td>
                 <td style="width: 50%; text-align: center; vertical-align: top;">
-                    <div style="color: #64748b; font-weight: 500; margin-bottom: 50px;">Disetujui Oleh,</div>
-                    <div style="font-weight: 700; color: #0f172a; display: inline-block; border-top: 1px solid #cbd5e1; padding-top: 6px; width: 180px;">Manajemen Cashflow</div>
+                    <div style="color: #64748b; font-weight: 500; margin-bottom: 5px;">Disetujui Oleh,</div>
+                    <div style="height: 50px; text-align: center; line-height: 50px;">
+                        @if($ttdDigital && file_exists(public_path('uploads/ttd/' . $ttdDigital)))
+                            <img src="{{ public_path('uploads/ttd/' . $ttdDigital) }}" style="max-height: 50px; max-width: 150px; vertical-align: middle;" alt="Tanda Tangan Digital">
+                        @endif
+                    </div>
+                    <div style="font-weight: 700; color: #0f172a; display: inline-block; border-top: 1px solid #cbd5e1; padding-top: 6px; width: 180px;">{{ $ttdNama }}</div>
                 </td>
             </tr>
         </table>
 
         <!-- Footer -->
         <div class="footer">
-            Dokumen ini dihasilkan secara otomatis oleh sistem {{ config('app.name', 'Cashflow') }}
+            Dokumen ini dihasilkan secara otomatis oleh sistem {{ $appName }}
         </div>
     </div>
 </body>

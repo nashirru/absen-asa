@@ -43,6 +43,12 @@
                 </select>
                 @error('category_id') <p class="text-xs text-admin-danger mt-1">{{ $message }}</p> @enderror
             </div>
+            <div id="jenisPengeluaranContainer" class="hidden">
+                <label id="jenisPengeluaranLabel" class="text-xs font-semibold text-admin-slate">Jenis Pengeluaran (Bisa dicentang)</label>
+                <div id="jenisPengeluaranCheckboxes" class="mt-2 grid grid-cols-2 gap-3 bg-admin-canvas p-4 rounded-admin-md border border-admin-border">
+                    <!-- Checkboxes will be dynamically rendered here -->
+                </div>
+            </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="text-xs font-semibold text-admin-slate">Jumlah</label>
@@ -51,7 +57,7 @@
                     @error('amount') <p class="text-xs text-admin-danger mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="text-xs font-semibold text-admin-slate">Lampiran</label>
+                    <label class="text-xs font-semibold text-admin-slate">Bukti Transaksi</label>
                     <input type="file" name="attachment" accept=".pdf,.jpg,.jpeg,.png"
                            class="w-full mt-1 px-4 py-2 bg-admin-canvas rounded-admin-md border border-admin-border text-sm text-admin-ink file:mr-3 file:py-1 file:px-3 file:rounded-admin-md file:border-0 file:text-xs file:font-medium file:bg-admin-indigo file:text-white">
                     @error('attachment') <p class="text-xs text-admin-danger mt-1">{{ $message }}</p> @enderror
@@ -70,19 +76,75 @@
     </div>
 </div>
 @endsection
-@section('scripts')
+@push('scripts')
 <script>
-function updateCategories() {
+let loadedCategories = [];
+
+function updateCategories(selectedCategoryId = null, selectedSubCategories = []) {
     const type = document.getElementById('txnType').value;
     fetch('{{ route("finance.transactions.categories-by-type") }}?type=' + type)
         .then(r => r.json())
         .then(data => {
+            loadedCategories = data;
             const sel = document.getElementById('txnCategory');
             sel.innerHTML = '<option value="">Pilih Kategori</option>';
-            Object.entries(data).forEach(([id, name]) => {
-                sel.innerHTML += '<option value="' + id + '">' + name + '</option>';
+            
+            loadedCategories.forEach(cat => {
+                const selected = (selectedCategoryId == cat.id) ? 'selected' : '';
+                sel.innerHTML += `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
             });
+
+            handleCategoryChange(selectedSubCategories);
         });
 }
+
+function handleCategoryChange(selectedSubCategories = []) {
+    const categoryId = document.getElementById('txnCategory').value;
+    const container = document.getElementById('jenisPengeluaranContainer');
+    const checkboxDiv = document.getElementById('jenisPengeluaranCheckboxes');
+    const label = document.getElementById('jenisPengeluaranLabel');
+    const type = document.getElementById('txnType').value;
+    
+    if (type === 'income') {
+        label.innerText = 'Jenis Pemasukan (Bisa dicentang)';
+    } else {
+        label.innerText = 'Jenis Pengeluaran (Bisa dicentang)';
+    }
+    
+    if (!categoryId) {
+        container.classList.add('hidden');
+        return;
+    }
+
+    const category = loadedCategories.find(c => c.id == categoryId);
+    if (category && category.sub_categories && category.sub_categories.length > 0) {
+        container.classList.remove('hidden');
+        checkboxDiv.innerHTML = '';
+        
+        category.sub_categories.forEach(sub => {
+            const isChecked = selectedSubCategories.includes(sub) ? 'checked' : '';
+            checkboxDiv.innerHTML += `
+                <label class="flex items-center gap-2 cursor-pointer select-none text-sm text-admin-ink">
+                    <input type="checkbox" name="jenis_pengeluaran[]" value="${sub}" ${isChecked}
+                           class="w-4 h-4 rounded border-admin-border text-admin-indigo accent-admin-indigo cursor-pointer">
+                    <span>${sub}</span>
+                </label>
+            `;
+        });
+    } else {
+        container.classList.add('hidden');
+        checkboxDiv.innerHTML = '';
+    }
+}
+
+document.getElementById('txnCategory').addEventListener('change', () => {
+    handleCategoryChange([]);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const initialCategoryId = "{{ old('category_id') }}";
+    const initialSubCategories = {!! json_encode(old('jenis_pengeluaran', [])) !!};
+    updateCategories(initialCategoryId, initialSubCategories);
+});
 </script>
-@endsection
+@endpush

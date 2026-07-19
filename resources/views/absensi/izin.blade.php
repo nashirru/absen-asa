@@ -6,7 +6,7 @@
     <!-- Page Header -->
     <div class="space-y-1">
         <h1 class="text-xl font-bold tracking-tight text-slate-900">Ajukan Izin</h1>
-        <p class="text-sm text-slate-500">Isi form berikut untuk mengajukan izin hari ini</p>
+        <p class="text-sm text-slate-500">Isi form berikut untuk mengajukan izin atau cuti (minimal H-2)</p>
     </div>
 
     <div class="s-card p-6">
@@ -35,7 +35,10 @@
 
             <div class="space-y-2">
                 <label class="s-label">Tanggal Pengajuan</label>
-                <input type="date" name="tanggal" value="{{ old('tanggal', now()->format('Y-m-d')) }}" required class="s-input">
+                <input type="date" name="tanggal" 
+                       value="{{ old('tanggal', now()->addDays(2)->format('Y-m-d')) }}" 
+                       min="{{ now()->addDays(2)->format('Y-m-d') }}" 
+                       required class="s-input">
                 @error('tanggal') <p class="text-xs text-red-500 font-medium">{{ $message }}</p> @enderror
             </div>
 

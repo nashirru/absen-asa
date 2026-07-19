@@ -63,6 +63,10 @@ class AccountController extends Controller
 
     public function destroy(Account $account)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus akun rekening.');
+        }
+
         $account->delete();
 
         return redirect()->route('finance.accounts.index')

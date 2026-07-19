@@ -115,23 +115,26 @@ class AbsensiController extends Controller
         // Load shift and check if it belongs to selected location
         $shift = \App\Models\Shift::where('location_id', $request->location_id)->findOrFail($request->shift_id);
 
-        // Enforce Time window
         $now = Carbon::now();
-        $jamMasuk = Carbon::parse($shift->jam_masuk);
-        $jamKeluar = Carbon::parse($shift->jam_keluar);
-        
-        $startWindow = $jamMasuk->copy()->subHours(2);
-        $endWindow = $jamKeluar;
-        
-        $currentTime = Carbon::createFromFormat('H:i:s', $now->format('H:i:s'));
-        $startTime = Carbon::createFromFormat('H:i:s', $startWindow->format('H:i:s'));
-        $endTime = Carbon::createFromFormat('H:i:s', $endWindow->format('H:i:s'));
-        
-        if ($currentTime->lt($startTime) || $currentTime->gt($endTime)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Absen masuk shift ini hanya dapat dilakukan antara jam ' . $startTime->format('H:i') . ' dan ' . $endTime->format('H:i') . '.',
-            ], 422);
+
+        // Enforce Time window
+        if (!$shift->is_24_hours) {
+            $jamMasuk = Carbon::parse($shift->jam_masuk);
+            $jamKeluar = Carbon::parse($shift->jam_keluar);
+            
+            $startWindow = $jamMasuk->copy()->subHours(2);
+            $endWindow = $jamKeluar;
+            
+            $currentTime = Carbon::createFromFormat('H:i:s', $now->format('H:i:s'));
+            $startTime = Carbon::createFromFormat('H:i:s', $startWindow->format('H:i:s'));
+            $endTime = Carbon::createFromFormat('H:i:s', $endWindow->format('H:i:s'));
+            
+            if ($currentTime->lt($startTime) || $currentTime->gt($endTime)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Absen masuk shift ini hanya dapat dilakukan antara jam ' . $startTime->format('H:i') . ' dan ' . $endTime->format('H:i') . '.',
+                ], 422);
+            }
         }
 
         // Check if already checked in to this specific shift today
@@ -191,6 +194,25 @@ class AbsensiController extends Controller
             $this->updateProfilePhoto($user, $request->selfie);
         }
 
+        // Auto check-out previous unclosed check-ins if exists
+        $unclosedAbsensi = Absensi::where('user_id', $user->id)
+            ->whereNull('jam_keluar')
+            ->whereNotNull('jam_masuk')
+            ->where('tanggal', '<', $today)
+            ->latest('tanggal')
+            ->first();
+
+        if ($unclosedAbsensi) {
+            $unclosedAbsensi->update([
+                'tanggal_keluar' => $today,
+                'jam_keluar' => $now->format('H:i:s'),
+                'latitude_keluar' => $request->latitude,
+                'longitude_keluar' => $request->longitude,
+                'accuracy_keluar' => $request->accuracy,
+                'distance_keluar' => round($distance, 2),
+            ]);
+        }
+
         $absensi = Absensi::create([
             'user_id' => $user->id,
             'location_id' => $location->id,
@@ -227,11 +249,9 @@ class AbsensiController extends Controller
     public function checkOut()
     {
         $user = auth()->user();
-        $today = Carbon::today();
 
-        // Get the active check-in of today (with jam_masuk, but no jam_keluar)
+        // Get the active check-in (with jam_masuk, but no jam_keluar)
         $existingAbsensi = Absensi::with('location')->where('user_id', $user->id)
-            ->where('tanggal', $today)
             ->whereNotNull('jam_masuk')
             ->whereNull('jam_keluar')
             ->latest()
@@ -257,18 +277,16 @@ class AbsensiController extends Controller
         ]);
 
         $user = auth()->user();
-        $today = Carbon::today();
 
-        // Get the active check-in of today
+        // Get the active check-in
         $existing = Absensi::where('user_id', $user->id)
-            ->where('tanggal', $today)
             ->whereNotNull('jam_masuk')
             ->whereNull('jam_keluar')
             ->latest()
             ->first();
 
         if (!$existing) {
-            return response()->json(['success' => false, 'message' => 'Anda belum check in hari ini atau sudah check out semua.'], 422);
+            return response()->json(['success' => false, 'message' => 'Anda belum check in atau sudah check out semua.'], 422);
         }
 
         // Enforce One-device policy
@@ -324,6 +342,7 @@ class AbsensiController extends Controller
         }
 
         $existing->update([
+            'tanggal_keluar' => Carbon::today(),
             'jam_keluar' => Carbon::now()->format('H:i:s'),
             'latitude_keluar' => $request->latitude,
             'longitude_keluar' => $request->longitude,
@@ -353,13 +372,21 @@ class AbsensiController extends Controller
         $user = auth()->user();
         $tanggal = $request->filled('tanggal') ? Carbon::parse($request->tanggal)->toDateString() : Carbon::today()->toDateString();
 
+        // Enforce H-2 validation for izin and cuti
+        if (in_array($request->status, ['izin', 'cuti'])) {
+            $minDate = Carbon::today()->addDays(2)->toDateString();
+            if ($tanggal < $minDate) {
+                return back()->withInput()->with('error', 'Pengajuan izin atau cuti harus dilakukan minimal H-2 (2 hari sebelum tanggal yang diajukan).');
+            }
+        }
+
         // Check if there is already an active absensi or izin/sakit/cuti for this date
         $existing = Absensi::where('user_id', $user->id)
             ->where('tanggal', $tanggal)
             ->first();
 
         if ($existing) {
-            return back()->with('error', 'Anda sudah memiliki catatan kehadiran untuk tanggal ' . Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') . '.');
+            return back()->withInput()->with('error', 'Anda sudah memiliki catatan kehadiran untuk tanggal ' . Carbon::parse($tanggal)->locale('id')->isoFormat('D MMMM Y') . '.');
         }
 
         Absensi::create([
@@ -505,6 +532,10 @@ class AbsensiController extends Controller
      */
     public function adminDestroy($id)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized action. Hanya Super Admin yang dapat menghapus data absensi.');
+        }
+
         $absensi = Absensi::findOrFail($id);
         $absensi->delete();
         return back()->with('success', 'Data absensi berhasil dihapus.');

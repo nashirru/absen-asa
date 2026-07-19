@@ -191,6 +191,10 @@ class JadwalController extends Controller
 
     public function destroy(Jadwal $jadwal)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus jadwal.');
+        }
+
         $user = auth()->user();
         if ($user->isSensei() && $user->sensei && $jadwal->sensei_id !== $user->sensei->id) {
             abort(403, 'Unauthorized action.');

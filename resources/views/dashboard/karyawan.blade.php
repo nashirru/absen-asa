@@ -5,15 +5,15 @@
 @section('content')
 <div class="space-y-4 animate-fade-in-up" x-data="dashboardApp()">
     <!-- Profile + Clock -->
-    <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between shadow-sm">
-        <div class="flex items-center gap-3">
+    <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center justify-between shadow-sm gap-3">
+        <div class="flex items-center gap-3 min-w-0">
             <img src="{{ $user->foto_url }}" class="w-11 h-11 rounded-full object-cover border border-gray-200" alt="">
             <div class="min-w-0">
                 <h2 class="text-sm font-bold text-gray-900 truncate">{{ $user->name }}</h2>
                 <p class="text-xs text-gray-500 truncate">{{ $karyawan->jabatan ?? '-' }} &bull; {{ $karyawan->divisi ?? '-' }}</p>
             </div>
         </div>
-        <div class="text-right">
+        <div class="text-right flex-shrink-0">
             <p class="text-[11px] text-gray-400">{{ now()->locale('id')->isoFormat('D MMM Y') }}</p>
             <p class="text-lg font-extrabold text-gray-900 tracking-tight mt-0.5" x-text="timeString">--:--:--</p>
         </div>

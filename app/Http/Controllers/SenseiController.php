@@ -117,6 +117,10 @@ class SenseiController extends Controller
 
     public function destroy(Sensei $sensei)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus sensei.');
+        }
+
         $user = $sensei->user;
         if ($user->foto && file_exists(public_path('uploads/foto/' . $user->foto))) {
             unlink(public_path('uploads/foto/' . $user->foto));

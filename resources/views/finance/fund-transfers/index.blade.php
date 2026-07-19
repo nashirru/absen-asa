@@ -34,6 +34,7 @@
                         <th class="text-left px-5 py-3">Ke Akun</th>
                         <th class="text-right px-5 py-3">Jumlah</th>
                         <th class="text-left px-5 py-3">Catatan</th>
+                        <th class="text-center px-5 py-3">Lampiran</th>
                         <th class="text-center px-5 py-3">Aksi</th>
                     </tr>
                 </thead>
@@ -46,15 +47,28 @@
                         <td class="px-5 py-3.5 text-admin-ink text-right font-mono font-semibold">Rp {{ number_format($tf->amount, 0, ',', '.') }}</td>
                         <td class="px-5 py-3.5 text-admin-mist max-w-[200px] truncate">{{ $tf->note ?? '-' }}</td>
                         <td class="px-5 py-3.5 text-center">
+                            @if($tf->attachment)
+                                <a href="{{ Storage::url($tf->attachment) }}" target="_blank"
+                                   class="inline-flex items-center gap-1 px-2 py-1 rounded-admin-md text-xs font-medium bg-admin-indigo-tint text-admin-indigo hover:bg-admin-indigo/20 transition-colors">
+                                    <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
+                                    Lihat
+                                </a>
+                            @else
+                                <span class="text-xs text-admin-mist">—</span>
+                            @endif
+                        </td>
+                        <td class="px-5 py-3.5 text-center">
                             <a href="{{ route('finance.fund-transfers.edit', $tf) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium mr-2">Edit</a>
-                            <form method="POST" action="{{ route('finance.fund-transfers.destroy', $tf) }}" class="inline" onsubmit="return confirm('Hapus transfer ini? Saldo akun akan dikembalikan.')">
+                            @if(auth()->user()->isSuperAdmin())
+                            <form method="POST" action="{{ route('finance.fund-transfers.destroy', $tf) }}" class="inline" onsubmit="confirmDelete(event, 'Hapus transfer ini? Saldo akun akan dikembalikan.')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium">Hapus</button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="px-5 py-8 text-center text-admin-mist">Belum ada transfer dana.</td></tr>
+                    <tr><td colspan="7" class="px-5 py-8 text-center text-admin-mist">Belum ada transfer dana.</td></tr>
                     @endforelse
                 </tbody>
             </table>

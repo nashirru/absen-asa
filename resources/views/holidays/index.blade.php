@@ -131,6 +131,7 @@
                                         </div>
                                     </td>
                                     <td class="py-3.5 px-6 text-right">
+                                        @if(auth()->user()->isSuperAdmin())
                                         <form action="{{ route('holidays.destroy', $holiday) }}" method="POST"
                                               class="delete-holiday-form">
                                             @csrf @method('DELETE')
@@ -142,6 +143,7 @@
                                                 Hapus
                                             </button>
                                         </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

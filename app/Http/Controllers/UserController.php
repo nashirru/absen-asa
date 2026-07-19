@@ -194,9 +194,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Admin cannot delete super_admin
-        if (auth()->user()->isAdmin() && $user->isSuperAdmin()) {
-            abort(403);
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus user.');
         }
 
         // Cannot delete self

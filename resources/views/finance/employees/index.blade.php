@@ -45,10 +45,12 @@
                         </td>
                         <td class="px-5 py-3.5 text-center">
                             <a href="{{ route('finance.employees.edit', $employee) }}" class="text-admin-indigo hover:text-admin-indigo-deep text-xs font-medium mr-2">Edit</a>
-                            <form method="POST" action="{{ route('finance.employees.destroy', $employee) }}" class="inline" onsubmit="return confirm('Hapus karyawan ini?')">
+                            @if(auth()->user()->isSuperAdmin())
+                            <form method="POST" action="{{ route('finance.employees.destroy', $employee) }}" class="inline" onsubmit="confirmDelete(event, 'Karyawan ini akan dihapus permanen.')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="text-admin-danger hover:text-red-700 text-xs font-medium">Hapus</button>
                             </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

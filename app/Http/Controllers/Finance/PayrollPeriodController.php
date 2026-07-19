@@ -53,29 +53,6 @@ class PayrollPeriodController extends Controller
             'status' => 'draft',
         ]);
 
-        // Auto-generate PayrollDetails for active karyawan
-        $activeKaryawans = Karyawan::where('status', 'active')->get();
-        foreach ($activeKaryawans as $karyawan) {
-            $allowances = $karyawan->salaryComponents()
-                ->where('type', 'allowance')
-                ->sum('amount');
-            $deductions = $karyawan->salaryComponents()
-                ->where('type', 'deduction')
-                ->sum('amount');
-            $netSalary = $karyawan->base_salary + $allowances - $deductions;
-            if ($netSalary < 0) $netSalary = 0;
-
-            PayrollDetail::create([
-                'payroll_period_id' => $period->id,
-                'karyawan_id' => $karyawan->id,
-                'base_salary' => $karyawan->base_salary,
-                'total_allowance' => $allowances,
-                'total_deduction' => $deductions,
-                'bonus' => 0,
-                'net_salary' => $netSalary,
-            ]);
-        }
-
         return redirect()->route('finance.payroll-periods.index')
             ->with('success', 'Periode gaji berhasil dibuat.');
     }
@@ -114,6 +91,10 @@ class PayrollPeriodController extends Controller
 
     public function destroy(PayrollPeriod $payrollPeriod)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus periode gaji.');
+        }
+
         if ($payrollPeriod->status === 'paid') {
             return redirect()->route('finance.payroll-periods.index')
                 ->with('error', 'Periode gaji yang sudah dibayar tidak dapat dihapus.');
@@ -147,14 +128,19 @@ class PayrollPeriodController extends Controller
             $payrollPeriod->update(['status' => 'processed']);
 
             $category = Category::firstOrCreate(
-                ['name' => 'Gaji Karyawan'],
-                ['type' => 'expense', 'color' => '#ef4444']
+                ['name' => 'Biaya administrasi dan umum'],
+                [
+                    'type' => 'expense',
+                    'color' => '#ef4444',
+                    'sub_categories' => ["Gaji karyawan", "Legalitas dan perizinan", "Perangkat lunak dan sistem", "Pajak"]
+                ]
             );
 
             Transaction::create([
                 'type' => 'expense',
                 'account_id' => $validated['account_id'],
                 'category_id' => $category->id,
+                'jenis_pengeluaran' => ['Gaji karyawan'],
                 'amount' => $totalNetSalary,
                 'description' => 'Penggajian Karyawan Periode ' . $payrollPeriod->month . '/' . $payrollPeriod->year,
                 'date' => Carbon::today(),
@@ -210,6 +196,10 @@ class PayrollPeriodController extends Controller
 
     public function destroyPayrollDetail(PayrollDetail $payrollDetail)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus rincian gaji.');
+        }
+
         $period = $payrollDetail->payrollPeriod;
 
         if ($period->status !== 'draft') {

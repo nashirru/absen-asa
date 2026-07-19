@@ -62,7 +62,7 @@
                     <p class="text-xs font-semibold text-admin-slate uppercase tracking-wider">Perangkat Terdaftar (One-Device Lock)</p>
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-mono bg-admin-surface border border-admin-border px-2.5 py-1 rounded text-admin-ink">{{ $user->device_uuid }}</span>
-                        <button type="button" onclick="document.getElementById('reset-device-form').submit()" 
+                        <button type="button" onclick="document.getElementById('reset-device-form').submit()"
                                 class="px-3 py-1.5 bg-red-600 text-white rounded-admin-md text-xs font-semibold hover:bg-red-700 transition-colors flex items-center gap-1.5">
                             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                             Reset Kunci Perangkat
@@ -76,12 +76,6 @@
                 <span class="text-sm">Status Aktif</span>
             </label>
 
-            @if(isset($user) && $user->device_uuid)
-                <form id="reset-device-form" action="{{ route('users.reset-device', $user) }}" method="POST" class="hidden">
-                    @csrf
-                </form>
-            @endif
-
             <div class="flex gap-3 pt-4">
                 <a href="{{ route('users.index') }}" class="flex-1 py-3 text-center rounded-admin-md border border-admin-border font-semibold text-sm hover:bg-admin-canvas transition-colors">Batal</a>
                 <button type="submit" class="flex-1 py-3 bg-admin-indigo text-white rounded-admin-md font-semibold text-sm hover:bg-admin-indigo-deep transition-colors">Simpan</button>
@@ -89,4 +83,10 @@
         </form>
     </div>
 </div>
+
+@if(isset($user) && $user->device_uuid)
+    <form id="reset-device-form" action="{{ route('users.reset-device', $user) }}" method="POST" class="hidden">
+        @csrf
+    </form>
+@endif
 @endsection

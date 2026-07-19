@@ -34,6 +34,13 @@ class CategoryController extends Controller
             'color' => 'required|string|max:7',
         ]);
 
+        $subCategoriesRaw = $request->input('sub_categories');
+        $subCategories = [];
+        if (!empty($subCategoriesRaw)) {
+            $subCategories = array_values(array_filter(array_map('trim', explode("\n", $subCategoriesRaw))));
+        }
+        $validated['sub_categories'] = $subCategories;
+
         Category::create($validated);
 
         return redirect()->route('finance.categories.index')
@@ -53,6 +60,13 @@ class CategoryController extends Controller
             'color' => 'required|string|max:7',
         ]);
 
+        $subCategoriesRaw = $request->input('sub_categories');
+        $subCategories = [];
+        if (!empty($subCategoriesRaw)) {
+            $subCategories = array_values(array_filter(array_map('trim', explode("\n", $subCategoriesRaw))));
+        }
+        $validated['sub_categories'] = $subCategories;
+
         $category->update($validated);
 
         return redirect()->route('finance.categories.index')
@@ -61,6 +75,10 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        if (!auth()->user()->isSuperAdmin()) {
+            abort(403, 'Hanya Super Admin yang dapat menghapus kategori.');
+        }
+
         $category->delete();
 
         return redirect()->route('finance.categories.index')

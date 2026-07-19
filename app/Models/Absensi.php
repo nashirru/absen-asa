@@ -40,12 +40,14 @@ class Absensi extends Model
         'is_mocked',
         'is_anomaly',
         'anomaly_details',
+        'tanggal_keluar',
     ];
 
     protected function casts(): array
     {
         return [
             'tanggal' => 'date',
+            'tanggal_keluar' => 'date',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'accuracy' => 'decimal:2',
